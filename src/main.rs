@@ -4,8 +4,10 @@ mod components;
 mod queries;
 mod plugins;
 mod resources;
+mod setup;
 
-use crate::plugins::hello_plugin::HelloPlugin;
+use crate::plugins::*;
+use crate::resources::game_state::GameState;
 
 fn main() {
     let app_default_plugin = DefaultPlugins.set(WindowPlugin {
@@ -16,8 +18,13 @@ fn main() {
             ..default()
         });
 
+
     App::new()
         .add_plugins(app_default_plugin)
-        .add_plugins(HelloPlugin)
+        .init_state::<GameState>()
+        .add_systems(Startup, setup::setup_system)
+        // .add_plugins(LogsOfWarPlugin)
+         // Adds the plugins for each state
+        .add_plugins((splash::splash_plugin, menu::menu_plugin))
         .run();
 }
