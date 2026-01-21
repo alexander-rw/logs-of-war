@@ -1,24 +1,23 @@
 use bevy::prelude::*;
 
 mod components;
+mod queries;
+mod plugins;
+mod resources;
 
-use crate::components::name::Name;
-use crate::components::person::Person;
-
-fn hello_world_system() {
-    println!("hello world");
-}
+use crate::plugins::hello_plugin::HelloPlugin;
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_systems(Startup, add_people)
-        .add_systems(Update, hello_world_system)
-        .run();
-}
+    let app_default_plugin = DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "Logs Of War".into(),
+                ..default()
+            }),
+            ..default()
+        });
 
-pub fn add_people(mut commands: Commands) {
-    commands.spawn((Person, Name("Elaina Proctor".to_string())));
-    commands.spawn((Person, Name("Renzo Hume".to_string())));
-    commands.spawn((Person, Name("Zayna Nieves".to_string())));
+    App::new()
+        .add_plugins(app_default_plugin)
+        .add_plugins(HelloPlugin)
+        .run();
 }
