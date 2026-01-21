@@ -21,7 +21,7 @@ pub fn splash_plugin(app: &mut App) {
 }
 
 fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let icon = asset_server.load("logs-of-war.jpg");
+    let icon = asset_server.load("logs-of-war.png");
     // Display the logo
     commands.spawn((
         // This entity will be despawned when exiting the state

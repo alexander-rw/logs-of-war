@@ -1,10 +1,9 @@
-use bevy::ecs::schedule::IntoScheduleConfigs;
-use bevy::prelude::{App, Plugin, Startup, Update};
+use bevy::prelude::{App, Plugin};
 
 pub struct LogsOfWarPlugin;
 
 impl Plugin for LogsOfWarPlugin {
-    fn build(&self, app: &mut App) {
-
+    fn build(&self, _app: &mut App) {
+        // todo
     }
 }

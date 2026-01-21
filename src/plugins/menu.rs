@@ -7,7 +7,8 @@ use bevy::{
     prelude::*,
 };
 
-use super::{DisplayQuality, GameState, Volume, TEXT_COLOR};
+use crate::resources::{colors::DEFAULT_TEXT_COLOR, game_state::GameState};
+use crate::resources::display_quality::{DisplayQuality};
 
 // This plugin manages the menu, with 5 different screens:
 // - a main menu with "New Game", "Settings", "Quit"
@@ -32,13 +33,7 @@ pub fn menu_plugin(app: &mut App) {
         .add_systems(
             Update,
             (setting_button::<DisplayQuality>.run_if(in_state(MenuState::SettingsDisplay)),),
-        )
-        // Systems to handle the sound settings screen
-        .add_systems(OnEnter(MenuState::SettingsSound), sound_settings_menu_setup)
-        .add_systems(
-            Update,
-            setting_button::<Volume>.run_if(in_state(MenuState::SettingsSound)),
-        )
+        ) 
         // Common systems to all screens that handles buttons behavior
         .add_systems(
             Update,
@@ -68,10 +63,6 @@ struct OnSettingsMenuScreen;
 // Tag component used to tag entities added on the display settings menu screen
 #[derive(Component)]
 struct OnDisplaySettingsMenuScreen;
-
-// Tag component used to tag entities added on the sound settings menu screen
-#[derive(Component)]
-struct OnSoundSettingsMenuScreen;
 
 const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
@@ -186,7 +177,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         font_size: 67.0,
                         ..default()
                     },
-                    TextColor(TEXT_COLOR),
+                    TextColor(DEFAULT_TEXT_COLOR),
                     Node {
                         margin: UiRect::all(px(50)),
                         ..default()
@@ -206,7 +197,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         (
                             Text::new("New Game"),
                             button_text_font.clone(),
-                            TextColor(TEXT_COLOR),
+                            TextColor(DEFAULT_TEXT_COLOR),
                         ),
                     ]
                 ),
@@ -220,7 +211,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         (
                             Text::new("Settings"),
                             button_text_font.clone(),
-                            TextColor(TEXT_COLOR),
+                            TextColor(DEFAULT_TEXT_COLOR),
                         ),
                     ]
                 ),
@@ -231,7 +222,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     MenuButtonAction::Quit,
                     children![
                         (ImageNode::new(exit_icon), button_icon_node),
-                        (Text::new("Quit"), button_text_font, TextColor(TEXT_COLOR),),
+                        (Text::new("Quit"), button_text_font, TextColor(DEFAULT_TEXT_COLOR),),
                     ]
                 ),
             ]
@@ -254,7 +245,7 @@ fn settings_menu_setup(mut commands: Commands) {
             font_size: 33.0,
             ..default()
         },
-        TextColor(TEXT_COLOR),
+        TextColor(DEFAULT_TEXT_COLOR),
     );
 
     commands.spawn((
@@ -312,7 +303,7 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
                 font_size: 33.0,
                 ..default()
             },
-            TextColor(TEXT_COLOR),
+            TextColor(DEFAULT_TEXT_COLOR),
         )
     }
 
@@ -348,8 +339,6 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
                         Spawn((Text::new("Display Quality"), button_text_style())),
                         SpawnWith(move |parent: &mut ChildSpawner| {
                             for quality_setting in [
-                                DisplayQuality::Low,
-                                DisplayQuality::Medium,
                                 DisplayQuality::High,
                             ] {
                                 let mut entity = parent.spawn((
@@ -380,82 +369,6 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
                     BackgroundColor(NORMAL_BUTTON),
                     MenuButtonAction::BackToSettings,
                     children![(Text::new("Back"), button_text_style())]
-                )
-            ]
-        )],
-    ));
-}
-
-fn sound_settings_menu_setup(mut commands: Commands, volume: Res<Volume>) {
-    let button_node = Node {
-        width: px(200),
-        height: px(65),
-        margin: UiRect::all(px(20)),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
-    };
-    let button_text_style = (
-        TextFont {
-            font_size: 33.0,
-            ..default()
-        },
-        TextColor(TEXT_COLOR),
-    );
-
-    let volume = *volume;
-    let button_node_clone = button_node.clone();
-    commands.spawn((
-        DespawnOnExit(MenuState::SettingsSound),
-        Node {
-            width: percent(100),
-            height: percent(100),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        },
-        OnSoundSettingsMenuScreen,
-        children![(
-            Node {
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            BackgroundColor(CRIMSON.into()),
-            children![
-                (
-                    Node {
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
-                    BackgroundColor(CRIMSON.into()),
-                    Children::spawn((
-                        Spawn((Text::new("Volume"), button_text_style.clone())),
-                        SpawnWith(move |parent: &mut ChildSpawner| {
-                            for volume_setting in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] {
-                                let mut entity = parent.spawn((
-                                    Button,
-                                    Node {
-                                        width: px(30),
-                                        height: px(65),
-                                        ..button_node_clone.clone()
-                                    },
-                                    BackgroundColor(NORMAL_BUTTON),
-                                    Volume(volume_setting),
-                                ));
-                                if volume == Volume(volume_setting) {
-                                    entity.insert(SelectedOption);
-                                }
-                            }
-                        })
-                    ))
-                ),
-                (
-                    Button,
-                    button_node,
-                    BackgroundColor(NORMAL_BUTTON),
-                    MenuButtonAction::BackToSettings,
-                    children![(Text::new("Back"), button_text_style)]
                 )
             ]
         )],

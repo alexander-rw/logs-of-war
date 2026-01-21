@@ -1,7 +1,5 @@
 use bevy::prelude::*;
 
-mod components;
-mod queries;
 mod plugins;
 mod resources;
 mod setup;
