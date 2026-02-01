@@ -10,7 +10,7 @@ struct SplashTimer(Timer);
 
 use crate::resources::game_state::GameState;
 
-// This plugin will display a splash screen with Bevy logo for 1 second before switching to the menu
+// This plugin will display a splash screen with Bevy logo for 2 seconds before switching to the menu
 pub fn splash_plugin(app: &mut App) {
     // As this plugin is managing the splash screen, it will focus on the state `GameState::Splash`
     app
@@ -44,7 +44,7 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         )],
     ));
     // Insert the timer as a resource
-    commands.insert_resource(SplashTimer(Timer::from_seconds(1.0, TimerMode::Once)));
+    commands.insert_resource(SplashTimer(Timer::from_seconds(2.0, TimerMode::Once)));
 }
 
 // Tick the timer, and change state when finished
