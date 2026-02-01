@@ -48,11 +48,7 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 // Tick the timer, and change state when finished
-fn countdown(
-    mut game_state: ResMut<NextState<GameState>>,
-    time: Res<Time>,
-    mut timer: ResMut<SplashTimer>,
-) {
+fn countdown(mut game_state: ResMut<NextState<GameState>>, time: Res<Time>, mut timer: ResMut<SplashTimer>) {
     if timer.tick(time.delta()).is_finished() {
         game_state.set(GameState::Menu);
     }

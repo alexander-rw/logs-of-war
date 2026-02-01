@@ -6,3 +6,11 @@ pub(crate) enum GameState {
     Menu,
     Game,
 }
+
+// Enum that will be used as a global state for the game
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, bevy::prelude::States)]
+pub(crate) enum LogsOfWarGameState {
+    #[default]
+    Running,
+    Stopped,
+}

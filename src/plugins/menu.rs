@@ -1,14 +1,12 @@
-
-
 use bevy::{
     app::AppExit,
-    color::palettes::css::CRIMSON,
+    color::palettes::css::{BURLYWOOD, CRIMSON},
     ecs::spawn::{SpawnIter, SpawnWith},
     prelude::*,
 };
 
+use crate::resources::display_quality::DisplayQuality;
 use crate::resources::{colors::DEFAULT_TEXT_COLOR, game_state::GameState};
-use crate::resources::display_quality::{DisplayQuality};
 
 // This plugin manages the menu, with 5 different screens:
 // - a main menu with "New Game", "Settings", "Quit"
@@ -33,7 +31,7 @@ pub fn menu_plugin(app: &mut App) {
         .add_systems(
             Update,
             (setting_button::<DisplayQuality>.run_if(in_state(MenuState::SettingsDisplay)),),
-        ) 
+        )
         // Common systems to all screens that handles buttons behavior
         .add_systems(
             Update,
@@ -143,14 +141,11 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         left: px(10),
         ..default()
     };
-    let button_text_font = TextFont {
-        font_size: 33.0,
-        ..default()
-    };
+    let button_text_font = TextFont { font_size: 33.0, ..default() };
 
-    let right_icon = asset_server.load("textures/Game Icons/right.png");
-    let wrench_icon = asset_server.load("textures/Game Icons/wrench.png");
-    let exit_icon = asset_server.load("textures/Game Icons/exitRight.png");
+    let right_icon = asset_server.load("textures/right.png");
+    let wrench_icon = asset_server.load("textures/wrench.png");
+    let exit_icon = asset_server.load("textures/exitRight.png");
 
     commands.spawn((
         DespawnOnExit(MenuState::Main),
@@ -163,25 +158,15 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         OnMainMenuScreen,
         children![(
-            Node {
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            BackgroundColor(CRIMSON.into()),
+            Node { flex_direction: FlexDirection::Column, align_items: AlignItems::Center, ..default() },
+            BackgroundColor(BURLYWOOD.into()),
             children![
                 // Display the game name
                 (
-                    Text::new("Bevy Game Menu UI"),
-                    TextFont {
-                        font_size: 67.0,
-                        ..default()
-                    },
+                    Text::new("Logs Of War"),
+                    TextFont { font_size: 67.0, ..default() },
                     TextColor(DEFAULT_TEXT_COLOR),
-                    Node {
-                        margin: UiRect::all(px(50)),
-                        ..default()
-                    },
+                    Node { margin: UiRect::all(px(50)), ..default() },
                 ),
                 // Display three buttons for each action available from the main menu:
                 // - new game
@@ -194,11 +179,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     MenuButtonAction::Play,
                     children![
                         (ImageNode::new(right_icon), button_icon_node.clone()),
-                        (
-                            Text::new("New Game"),
-                            button_text_font.clone(),
-                            TextColor(DEFAULT_TEXT_COLOR),
-                        ),
+                        (Text::new("New Game"), button_text_font.clone(), TextColor(DEFAULT_TEXT_COLOR),),
                     ]
                 ),
                 (
@@ -208,11 +189,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     MenuButtonAction::Settings,
                     children![
                         (ImageNode::new(wrench_icon), button_icon_node.clone()),
-                        (
-                            Text::new("Settings"),
-                            button_text_font.clone(),
-                            TextColor(DEFAULT_TEXT_COLOR),
-                        ),
+                        (Text::new("Settings"), button_text_font.clone(), TextColor(DEFAULT_TEXT_COLOR),),
                     ]
                 ),
                 (
@@ -240,13 +217,7 @@ fn settings_menu_setup(mut commands: Commands) {
         ..default()
     };
 
-    let button_text_style = (
-        TextFont {
-            font_size: 33.0,
-            ..default()
-        },
-        TextColor(DEFAULT_TEXT_COLOR),
-    );
+    let button_text_style = (TextFont { font_size: 33.0, ..default() }, TextColor(DEFAULT_TEXT_COLOR));
 
     commands.spawn((
         DespawnOnExit(MenuState::Settings),
@@ -259,11 +230,7 @@ fn settings_menu_setup(mut commands: Commands) {
         },
         OnSettingsMenuScreen,
         children![(
-            Node {
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                ..default()
-            },
+            Node { flex_direction: FlexDirection::Column, align_items: AlignItems::Center, ..default() },
             BackgroundColor(CRIMSON.into()),
             Children::spawn(SpawnIter(
                 [
@@ -298,13 +265,7 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
         }
     }
     fn button_text_style() -> impl Bundle {
-        (
-            TextFont {
-                font_size: 33.0,
-                ..default()
-            },
-            TextColor(DEFAULT_TEXT_COLOR),
-        )
+        (TextFont { font_size: 33.0, ..default() }, TextColor(DEFAULT_TEXT_COLOR))
     }
 
     let display_quality = *display_quality;
@@ -319,41 +280,25 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
         },
         OnDisplaySettingsMenuScreen,
         children![(
-            Node {
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                ..default()
-            },
+            Node { flex_direction: FlexDirection::Column, align_items: AlignItems::Center, ..default() },
             BackgroundColor(CRIMSON.into()),
             children![
                 // Create a new `Node`, this time not setting its `flex_direction`. It will
                 // use the default value, `FlexDirection::Row`, from left to right.
                 (
-                    Node {
-                        align_items: AlignItems::Center,
-                        ..default()
-                    },
+                    Node { align_items: AlignItems::Center, ..default() },
                     BackgroundColor(CRIMSON.into()),
                     Children::spawn((
                         // Display a label for the current setting
                         Spawn((Text::new("Display Quality"), button_text_style())),
                         SpawnWith(move |parent: &mut ChildSpawner| {
-                            for quality_setting in [
-                                DisplayQuality::High,
-                            ] {
+                            for quality_setting in [DisplayQuality::High] {
                                 let mut entity = parent.spawn((
                                     Button,
-                                    Node {
-                                        width: px(150),
-                                        height: px(65),
-                                        ..button_node()
-                                    },
+                                    Node { width: px(150), height: px(65), ..button_node() },
                                     BackgroundColor(NORMAL_BUTTON),
                                     quality_setting,
-                                    children![(
-                                        Text::new(format!("{quality_setting:?}")),
-                                        button_text_style(),
-                                    )],
+                                    children![(Text::new(format!("{quality_setting:?}")), button_text_style(),)],
                                 ));
                                 if display_quality == quality_setting {
                                     entity.insert(SelectedOption);
@@ -376,10 +321,7 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
 }
 
 fn menu_action(
-    interaction_query: Query<
-        (&Interaction, &MenuButtonAction),
-        (Changed<Interaction>, With<Button>),
-    >,
+    interaction_query: Query<(&Interaction, &MenuButtonAction), (Changed<Interaction>, With<Button>)>,
     mut app_exit_writer: MessageWriter<AppExit>,
     mut menu_state: ResMut<NextState<MenuState>>,
     mut game_state: ResMut<NextState<GameState>>,
