@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
+mod components;
 mod plugins;
 mod resources;
 mod setup;
-mod components;
 
 use crate::plugins::*;
 use crate::resources::game_state::GameState;
