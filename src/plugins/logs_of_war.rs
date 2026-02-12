@@ -47,7 +47,7 @@ impl Plugin for LogsOfWarPlugin {
 
     fn name(&self) -> &str {
         core::any::type_name::<Self>()
-    }
+}
 
     fn is_unique(&self) -> bool {
         true

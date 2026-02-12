@@ -35,15 +35,6 @@ If the code is not fully optimized before handing off to the user, you will be f
   - The typography/theming of the application **MUST** be modern and unique, similar to that of popular single-page web/mobile. **ALWAYS** add an appropriate font for headers and body text. You may reference fonts from Google Fonts.
   - **NEVER** use the Pico CSS defaults as-is: a separate CSS/SCSS file is encouraged. The design **MUST** logically complement the semantics of the application use case.
   - **ALWAYS** rebuild the WASM binary if any underlying Rust code that affects it is touched.
-- For data processing:
-  - **ALWAYS** use `polars` instead of other data frame libraries for tabular data manipulation.
-  - If a `polars` dataframe will be printed, **NEVER** simultaneously print the number of entries in the dataframe nor the schema as it is redundant.
-  - **NEVER** ingest more than 10 rows of a data frame at a time. Only analyze subsets of data to avoid overloading your memory context.
-- If using Python to implement Rust code using PyO3/`maturin`:
-  - Rebuild the Python package with `maturin` after finishing all Rust code changes.
-  - **ALWAYS** use `uv` for Python package management and to create a `.venv` if it is not present. **NEVER** use the base system Python installation.
-  - Ensure `.venv` is added to `.gitignore`.
-  - Ensure `ipykernel` and `ipywidgets` is installed in `.venv` for Jupyter Notebook compatability. This should not be in package requirements.
   - **MUST** keep functions focused on a single responsibility
   - **NEVER** use mutable objects (lists, dicts) as default argument values
   - Limit function parameters to 5 or fewer
@@ -198,7 +189,6 @@ pub fn calculate_total(items: &[Item], tax_rate: f64) -> Result<f64, Calculation
 - Use `cargo` for building, testing, and dependency management
 - Use `cargo test` for running tests
 - Use `cargo doc` for generating documentation
-- **NEVER** build with `cargo build --features python`: this will always fail. Instead, **ALWAYS** use `maturin`.
 
 ## Before Committing
 
