@@ -1,8 +1,9 @@
-use avian3d::prelude::{AngularVelocity, Collider, RigidBody};
+use avian3d::prelude::*;
+
 use bevy::{
     app::Update,
     ecs::{
-        entity::EntityIndex, resource::Resource, schedule::IntoScheduleConfigs, system::{Commands, Res, ResMut, command}
+        resource::Resource, schedule::IntoScheduleConfigs, system::{Commands, Res, ResMut}
     },
     prelude::*,
     state::{
@@ -15,7 +16,7 @@ use bevy::{
 
 use crate::{
     components::game_camera::GameCamera,
-    resources::game_state::{GameState, LogsOfWarGameState},
+    resources::game_state::{GameState, LogsOfWarGameState}, systems::despawn_on_should_despawn_true::despawn_on_should_despawn_true,
 };
 
 pub struct LogsOfWarPlugin;
@@ -23,18 +24,17 @@ pub struct LogsOfWarPlugin;
 #[derive(Resource, Deref, DerefMut)]
 struct GameTimer(Timer);
 
-// #[derive(Resource)]
-// struct GameWorld {
-//     map: Entity,
-//     cube: Entity,
-// }
+#[derive(Component)]
+struct Cube;
 
+#[derive(Component)]
+pub struct ShouldDespawn(pub bool);
 
 impl Plugin for LogsOfWarPlugin {
     fn build(&self, app: &mut App) {
         app.init_state::<LogsOfWarGameState>()
             .add_systems(OnEnter(GameState::Game), game_setup)
-            .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Game)));
+            .add_systems(Update, (update_camera, countdown, despawn_on_should_despawn_true).run_if(in_state(GameState::Game)));
 
         self.ready(app);
     }
@@ -75,7 +75,6 @@ fn game_setup(
         Collider::cylinder(400.0, 0.1),
         Mesh3d(meshes.add(Cylinder::new(4.0, 0.1))),
         MeshMaterial3d(materials.add(Color::WHITE)),
-
     ));
 
     // light
@@ -85,45 +84,61 @@ fn game_setup(
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
 
+    spawn_cube(&mut commands, &mut meshes, &mut materials);
 
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
 }
 
-fn spawn_cube(mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, 
-    mut materials: ResMut<Assets<StandardMaterial>>) -> Entity {
+/// Spawn a dynamic physics cube with a collision shape and initial angular velocity.
+///
+/// # Arguments
+///
+/// * `commands` - Mutable reference to the Bevy command queue for spawning entities
+/// * `meshes` - Mutable reference to the mesh asset store
+/// * `materials` - Mutable reference to the material asset store
+///
+/// # Returns
+///
+/// The `Entity` ID of the newly spawned cube
+fn spawn_cube(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+) -> Entity {
     // Dynamic physics object with a collision shape and initial angular velocity
-    let ent = commands.spawn((
+    commands.spawn((
         RigidBody::Dynamic,
         Collider::cuboid(1.0, 1.0, 1.0),
         AngularVelocity(Vec3::new(2.5, 3.5, 15.0)),
         Mesh3d(meshes.add(Cuboid::from_length(1.0))),
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
         Transform::from_xyz(0.0, 4.0, 0.0),
-    )).id();
-
-    ent
+        Cube,
+        ShouldDespawn(false)
+    )).id()
 }
-
-fn despawn_cube(mut commands: Commands, >) {
-    commands.entity(entity)
-}
-
 // https://github.com/bevyengine/bevy/discussions/2658
-
 // Tick the timer, and change state when finished
+
 fn countdown(
     mut game_state: ResMut<NextState<GameState>>,
     mut inner_game_state: ResMut<NextState<LogsOfWarGameState>>,
     mut timer: ResMut<GameTimer>,
-    mut commands: Commands,
-    query: Query<Entity, With<Enemy>>,
+    commands: Commands,
+    query: Query<Entity, With<Cube>>,
     time: Res<Time>,
 ) {
     if timer.tick(time.delta()).is_finished() {
-        despawn_cube();
+        mark_cube_as_despawnable(commands, query);
         inner_game_state.set(LogsOfWarGameState::Stopped);
         game_state.set(GameState::Menu);
     }
+}
+
+fn mark_cube_as_despawnable(mut commands: Commands<'_, '_>, query: Query<'_, '_, Entity, With<Cube>>) -> () {
+    query.into_iter().for_each(|entity| {
+        commands.entity(entity).insert(ShouldDespawn(true));
+    });
 }
 
 fn update_camera(mut q: Query<(&Camera3d, &mut Transform), With<GameCamera>>) {

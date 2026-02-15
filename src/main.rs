@@ -4,6 +4,7 @@ mod components;
 mod plugins;
 mod resources;
 mod setup;
+mod systems;
 
 use crate::plugins::*;
 use crate::resources::game_state::GameState;
