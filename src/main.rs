@@ -5,6 +5,7 @@ mod plugins;
 mod resources;
 mod setup;
 mod systems;
+mod log_character;
 
 use crate::plugins::*;
 use crate::resources::game_state::GameState;
