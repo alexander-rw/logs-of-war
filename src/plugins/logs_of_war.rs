@@ -15,8 +15,7 @@ use bevy::{
 };
 
 use crate::{
-    components::game_camera::GameCamera,
-    resources::game_state::{GameState, LogsOfWarGameState}, systems::despawn_on_should_despawn_true::despawn_on_should_despawn_true,
+    components::game_camera::GameCamera, log_character::log_character::LogCharacter, resources::game_state::{GameState, LogsOfWarGameState}, systems::despawn_on_should_despawn_true::despawn_on_should_despawn_true
 };
 
 pub struct LogsOfWarPlugin;
@@ -86,6 +85,18 @@ fn game_setup(
 
     spawn_cube(&mut commands, &mut meshes, &mut materials);
 
+    let size: Vec3 = Vec3::new(0.5, 5.0, 0.5);
+
+    let player_test = (
+        RigidBody::Dynamic,
+        Collider::cuboid(size.x, size.y, size.z),
+        Mesh3d(meshes.add(Cuboid::new(size.x, size.y, size.z))),
+        MeshMaterial3d(materials.add(Color::srgb_u8(255, 144, 125))),
+        LogCharacter::generate(),
+    );
+
+    commands.spawn(player_test);
+
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
 }
 
@@ -114,7 +125,7 @@ fn spawn_cube(
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
         Transform::from_xyz(0.0, 4.0, 0.0),
         Cube,
-        ShouldDespawn(false)
+        LogCharacter::generate(),
     )).id()
 }
 // https://github.com/bevyengine/bevy/discussions/2658
@@ -124,12 +135,14 @@ fn countdown(
     mut game_state: ResMut<NextState<GameState>>,
     mut inner_game_state: ResMut<NextState<LogsOfWarGameState>>,
     mut timer: ResMut<GameTimer>,
-    commands: Commands,
-    query: Query<Entity, With<Cube>>,
+    mut query: Query<(Entity, &mut LogCharacter)>,
     time: Res<Time>,
 ) {
     if timer.tick(time.delta()).is_finished() {
-        mark_cube_as_despawnable(commands, query);
+        // mark_cube_as_despawnable(commands, query);
+        for (_entity, mut log_char) in query.iter_mut() {
+            log_char.take_damage(100);
+        }
         inner_game_state.set(LogsOfWarGameState::Stopped);
         game_state.set(GameState::Menu);
     }
