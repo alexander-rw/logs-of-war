@@ -1,11 +1,12 @@
-use bevy::prelude::*;use avian3d::prelude::*;
+use avian3d::prelude::*;
+use bevy::prelude::*;
 
 mod components;
+mod log_character;
 mod plugins;
 mod resources;
 mod setup;
 mod systems;
-mod log_character;
 
 use crate::plugins::*;
 use crate::resources::game_state::GameState;

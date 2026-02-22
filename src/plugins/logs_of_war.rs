@@ -3,7 +3,9 @@ use avian3d::prelude::*;
 use bevy::{
     app::Update,
     ecs::{
-        resource::Resource, schedule::IntoScheduleConfigs, system::{Commands, Res, ResMut}
+        resource::Resource,
+        schedule::IntoScheduleConfigs,
+        system::{Commands, Res, ResMut},
     },
     prelude::*,
     state::{
@@ -15,7 +17,10 @@ use bevy::{
 };
 
 use crate::{
-    components::game_camera::GameCamera, log_character::log_character::LogCharacter, resources::game_state::{GameState, LogsOfWarGameState}, systems::despawn_on_should_despawn_true::despawn_on_should_despawn_true
+    components::game_camera::GameCamera,
+    log_character::log_character::LogCharacter,
+    resources::game_state::{GameState, LogsOfWarGameState},
+    systems::despawn_on_should_despawn_true::despawn_character,
 };
 
 pub struct LogsOfWarPlugin;
@@ -24,16 +29,16 @@ pub struct LogsOfWarPlugin;
 struct GameTimer(Timer);
 
 #[derive(Component)]
-struct Cube;
-
-#[derive(Component)]
 pub struct ShouldDespawn(pub bool);
 
 impl Plugin for LogsOfWarPlugin {
     fn build(&self, app: &mut App) {
-        app.init_state::<LogsOfWarGameState>()
-            .add_systems(OnEnter(GameState::Game), game_setup)
-            .add_systems(Update, (update_camera, countdown, despawn_on_should_despawn_true).run_if(in_state(GameState::Game)));
+        app.init_state::<LogsOfWarGameState>().add_systems(OnEnter(GameState::Game), game_setup)
+        .add_systems(
+            Update,
+            (update_camera, countdown).run_if(in_state(GameState::Game)),
+        )
+        .add_systems(FixedUpdate, despawn_character);
 
         self.ready(app);
     }
@@ -43,16 +48,16 @@ impl Plugin for LogsOfWarPlugin {
     }
 
     fn finish(&self, _app: &mut App) {
-        print!("Finish::LogsOfWarPlugin");
+        info!("Finish::LogsOfWarPlugin");
     }
 
     fn cleanup(&self, _app: &mut App) {
-        print!("Cleanup::LogsOfWarPlugin");
+        info!("Cleanup::LogsOfWarPlugin");
     }
 
     fn name(&self) -> &str {
         core::any::type_name::<Self>()
-}
+    }
 
     fn is_unique(&self) -> bool {
         true
@@ -64,7 +69,7 @@ fn game_setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    println!("Setting up Logs of War game state");
+    info_once!("Setting up Logs of War game state");
     // Spawn a 5 seconds timer to trigger going back to the menu
 
     // circular base
@@ -100,33 +105,20 @@ fn game_setup(
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
 }
 
-/// Spawn a dynamic physics cube with a collision shape and initial angular velocity.
-///
-/// # Arguments
-///
-/// * `commands` - Mutable reference to the Bevy command queue for spawning entities
-/// * `meshes` - Mutable reference to the mesh asset store
-/// * `materials` - Mutable reference to the material asset store
-///
-/// # Returns
-///
-/// The `Entity` ID of the newly spawned cube
-fn spawn_cube(
-    commands: &mut Commands,
-    meshes: &mut Assets<Mesh>,
-    materials: &mut Assets<StandardMaterial>,
-) -> Entity {
+
+fn spawn_cube(commands: &mut Commands, meshes: &mut Assets<Mesh>, materials: &mut Assets<StandardMaterial>) -> Entity {
     // Dynamic physics object with a collision shape and initial angular velocity
-    commands.spawn((
-        RigidBody::Dynamic,
-        Collider::cuboid(1.0, 1.0, 1.0),
-        AngularVelocity(Vec3::new(2.5, 3.5, 15.0)),
-        Mesh3d(meshes.add(Cuboid::from_length(1.0))),
-        MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
-        Transform::from_xyz(0.0, 4.0, 0.0),
-        Cube,
-        LogCharacter::generate(),
-    )).id()
+    commands
+        .spawn((
+            RigidBody::Dynamic,
+            Collider::cuboid(1.0, 1.0, 1.0),
+            AngularVelocity(Vec3::new(2.5, 3.5, 15.0)),
+            Mesh3d(meshes.add(Cuboid::from_length(1.0))),
+            MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
+            Transform::from_xyz(0.0, 4.0, 0.0),
+            LogCharacter::generate(),
+        ))
+        .id()
 }
 // https://github.com/bevyengine/bevy/discussions/2658
 // Tick the timer, and change state when finished
@@ -139,19 +131,14 @@ fn countdown(
     time: Res<Time>,
 ) {
     if timer.tick(time.delta()).is_finished() {
-        // mark_cube_as_despawnable(commands, query);
-        for (_entity, mut log_char) in query.iter_mut() {
+        for (entity, mut log_char) in query.iter_mut() {
+            info!("Found e: {0}, {1}", entity.index_u32(), log_char.name);
             log_char.take_damage(100);
+            info!("Health: {0}, {1}", log_char.name, log_char.health);
         }
         inner_game_state.set(LogsOfWarGameState::Stopped);
         game_state.set(GameState::Menu);
     }
-}
-
-fn mark_cube_as_despawnable(mut commands: Commands<'_, '_>, query: Query<'_, '_, Entity, With<Cube>>) -> () {
-    query.into_iter().for_each(|entity| {
-        commands.entity(entity).insert(ShouldDespawn(true));
-    });
 }
 
 fn update_camera(mut q: Query<(&Camera3d, &mut Transform), With<GameCamera>>) {
