@@ -4,8 +4,8 @@
 //! sine-wave hills for visual interest.
 
 use avian3d::prelude::{Collider, RigidBody};
+use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
-use bevy::render::mesh::{Mesh, VertexAttributeValues};
 
 use crate::resources::game_state::GameState;
 
@@ -36,19 +36,13 @@ use crate::resources::game_state::GameState;
 pub fn generate_heightmap_mesh(size: f32, subdivisions: u32, height_scale: f32) -> Mesh {
     // Create a flat plane mesh as the base
     // Plane3d creates a plane facing upward (Y-up) by default
-    let mut mesh = Plane3d::default()
-        .mesh()
-        .size(size, size)
-        .subdivisions(subdivisions)
-        .build();
+    let mut mesh = Plane3d::default().mesh().size(size, size).subdivisions(subdivisions).build();
 
     // Modify vertex Y positions to create hills
     // Note for Python developers: `if let Some(...)` is Rust's way of safely
     // unwrapping an Option. If the attribute exists and matches the expected
     // type, we get mutable access to the positions array.
-    if let Some(VertexAttributeValues::Float32x3(positions)) =
-        mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION)
-    {
+    if let Some(VertexAttributeValues::Float32x3(positions)) = mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION) {
         for pos in positions.iter_mut() {
             // Combine two sine waves at different frequencies for natural-looking hills
             // pos[0] is X, pos[2] is Z (Y is up in Bevy)
@@ -94,8 +88,8 @@ pub fn spawn_terrain(
     // Create a trimesh collider from the mesh for accurate physics
     // Note for Python developers: `expect()` is like Python's assert - it
     // unwraps the Result or panics with the given message if it's an error.
-    let collider = Collider::trimesh_from_mesh(&terrain_mesh)
-        .expect("Failed to create trimesh collider from terrain mesh");
+    let collider =
+        Collider::trimesh_from_mesh(&terrain_mesh).expect("Failed to create trimesh collider from terrain mesh");
 
     // Add the mesh to the asset store and get a handle
     let mesh_handle = meshes.add(terrain_mesh);

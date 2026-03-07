@@ -21,6 +21,7 @@ use crate::{
     log_character::log_character::LogCharacter,
     resources::game_state::{GameState, LogsOfWarGameState},
     systems::despawn_on_should_despawn_true::despawn_character,
+    systems::terrain::spawn_terrain,
 };
 
 pub struct LogsOfWarPlugin;
@@ -28,17 +29,12 @@ pub struct LogsOfWarPlugin;
 #[derive(Resource, Deref, DerefMut)]
 struct GameTimer(Timer);
 
-#[derive(Component)]
-pub struct ShouldDespawn(pub bool);
-
 impl Plugin for LogsOfWarPlugin {
     fn build(&self, app: &mut App) {
-        app.init_state::<LogsOfWarGameState>().add_systems(OnEnter(GameState::Game), game_setup)
-        .add_systems(
-            Update,
-            (update_camera, countdown).run_if(in_state(GameState::Game)),
-        )
-        .add_systems(FixedUpdate, despawn_character);
+        app.init_state::<LogsOfWarGameState>()
+            .add_systems(OnEnter(GameState::Game), (spawn_terrain, game_setup))
+            .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Game)))
+            .add_systems(FixedUpdate, despawn_character);
 
         self.ready(app);
     }
@@ -70,16 +66,6 @@ fn game_setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     info_once!("Setting up Logs of War game state");
-    // Spawn a 5 seconds timer to trigger going back to the menu
-
-    // circular base
-    // Static physics object with a collision shape
-    commands.spawn((
-        RigidBody::Static,
-        Collider::cylinder(400.0, 0.1),
-        Mesh3d(meshes.add(Cylinder::new(4.0, 0.1))),
-        MeshMaterial3d(materials.add(Color::WHITE)),
-    ));
 
     // light
     commands.spawn((
@@ -104,7 +90,6 @@ fn game_setup(
 
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
 }
-
 
 fn spawn_cube(commands: &mut Commands, meshes: &mut Assets<Mesh>, materials: &mut Assets<StandardMaterial>) -> Entity {
     // Dynamic physics object with a collision shape and initial angular velocity
