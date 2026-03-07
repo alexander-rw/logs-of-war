@@ -1,5 +1,3 @@
-use avian3d::prelude::*;
-
 use bevy::{
     app::Update,
     ecs::{
@@ -20,7 +18,9 @@ use crate::{
     components::game_camera::GameCamera,
     log_character::log_character::LogCharacter,
     resources::game_state::{GameState, LogsOfWarGameState},
+    resources::terrain_config::TerrainConfig,
     systems::despawn_on_should_despawn_true::despawn_character,
+    systems::spawn_teams::spawn_teams,
     systems::terrain::spawn_terrain,
 };
 
@@ -31,8 +31,11 @@ struct GameTimer(Timer);
 
 impl Plugin for LogsOfWarPlugin {
     fn build(&self, app: &mut App) {
+        // Insert TerrainConfig resource with default values
+        app.insert_resource(TerrainConfig::default());
+
         app.init_state::<LogsOfWarGameState>()
-            .add_systems(OnEnter(GameState::Game), (spawn_terrain, game_setup))
+            .add_systems(OnEnter(GameState::Game), (spawn_terrain, spawn_teams, game_setup))
             .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Game)))
             .add_systems(FixedUpdate, despawn_character);
 
@@ -60,50 +63,19 @@ impl Plugin for LogsOfWarPlugin {
     }
 }
 
-fn game_setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+/// Sets up game lighting and timer.
+fn game_setup(mut commands: Commands) {
     info_once!("Setting up Logs of War game state");
 
-    // light
+    // Point light for scene illumination
     commands.spawn((
         DespawnOnExit(GameState::Game),
         PointLight { shadows_enabled: true, ..default() },
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
 
-    spawn_cube(&mut commands, &mut meshes, &mut materials);
-
-    let size: Vec3 = Vec3::new(0.5, 5.0, 0.5);
-
-    let player_test = (
-        RigidBody::Dynamic,
-        Collider::cuboid(size.x, size.y, size.z),
-        Mesh3d(meshes.add(Cuboid::new(size.x, size.y, size.z))),
-        MeshMaterial3d(materials.add(Color::srgb_u8(255, 144, 125))),
-        LogCharacter::generate(),
-    );
-
-    commands.spawn(player_test);
-
+    // Timer for demo purposes (will be replaced by turn system)
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
-}
-
-fn spawn_cube(commands: &mut Commands, meshes: &mut Assets<Mesh>, materials: &mut Assets<StandardMaterial>) -> Entity {
-    // Dynamic physics object with a collision shape and initial angular velocity
-    commands
-        .spawn((
-            RigidBody::Dynamic,
-            Collider::cuboid(1.0, 1.0, 1.0),
-            AngularVelocity(Vec3::new(2.5, 3.5, 15.0)),
-            Mesh3d(meshes.add(Cuboid::from_length(1.0))),
-            MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255))),
-            Transform::from_xyz(0.0, 4.0, 0.0),
-            LogCharacter::generate(),
-        ))
-        .id()
 }
 // https://github.com/bevyengine/bevy/discussions/2658
 // Tick the timer, and change state when finished
