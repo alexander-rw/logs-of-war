@@ -8,6 +8,7 @@ use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
 
 use crate::resources::game_state::GameState;
+use crate::resources::terrain_config::TerrainConfig;
 
 /// Generates a heightmap terrain mesh with procedural sine-wave hills.
 ///
@@ -60,14 +61,15 @@ pub fn generate_heightmap_mesh(size: f32, subdivisions: u32, height_scale: f32) 
 
 /// Spawns the game terrain as a heightmap with physics collider.
 ///
-/// Creates a 40x40 unit terrain with gentle hills and a trimesh collider
-/// for accurate physics collision detection.
+/// Uses [`TerrainConfig`] resource for terrain dimensions and properties.
+/// Creates a trimesh collider for accurate physics collision detection.
 ///
 /// # Arguments
 ///
 /// * `commands` - Bevy command buffer for spawning entities
 /// * `meshes` - Asset storage for meshes
 /// * `materials` - Asset storage for materials
+/// * `config` - Terrain configuration resource
 ///
 /// # Panics
 ///
@@ -75,15 +77,15 @@ pub fn generate_heightmap_mesh(size: f32, subdivisions: u32, height_scale: f32) 
 // Note for Python developers: This is a Bevy "system" function. The parameters
 // are automatically injected by Bevy's ECS at runtime based on their types.
 // `Commands` lets us spawn entities, `ResMut<Assets<T>>` gives mutable access
-// to asset storage.
+// to asset storage, `Res<T>` gives read-only access to resources.
 pub fn spawn_terrain(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    config: Res<TerrainConfig>,
 ) {
-    // Generate the heightmap terrain mesh
-    // 40x40 units, 32 subdivisions per axis, 1.5 unit max hill height
-    let terrain_mesh = generate_heightmap_mesh(40.0, 32, 1.5);
+    // Generate the heightmap terrain mesh using config values
+    let terrain_mesh = generate_heightmap_mesh(config.size, config.subdivisions, config.height_scale);
 
     // Create a trimesh collider from the mesh for accurate physics
     // Note for Python developers: `expect()` is like Python's assert - it
