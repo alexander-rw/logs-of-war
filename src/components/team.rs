@@ -4,6 +4,7 @@
 //! for distinguishing between opposing teams in the game.
 
 use bevy::color::Color;
+use bevy::ecs::component::Component;
 
 /// Unique identifier for each team.
 ///
@@ -80,4 +81,29 @@ impl TeamId {
             TeamId::Blue => "Blue Team",
         }
     }
+}
+
+/// Component that identifies which team an entity belongs to.
+///
+/// Attach this component to log soldier entities to assign them to a team.
+/// The component wraps a [`TeamId`] and provides access to team-specific
+/// properties like color and name.
+///
+/// # Examples
+///
+/// ```
+/// use bevy::prelude::*;
+/// use logs_of_war::components::team::{Team, TeamId};
+///
+/// fn spawn_soldier(mut commands: Commands) {
+///     commands.spawn(Team { id: TeamId::Red });
+/// }
+/// ```
+// Note for Python developers: In Rust, we often wrap simple enums in a struct
+// when using them as ECS components. This allows the struct to derive the
+// Component trait while keeping the enum focused on its domain logic.
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Team {
+    /// The team identifier for this entity.
+    pub id: TeamId,
 }
