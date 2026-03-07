@@ -107,4 +107,3 @@ pub struct Team {
     /// The team identifier for this entity.
     pub id: TeamId,
 }
-

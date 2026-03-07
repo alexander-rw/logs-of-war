@@ -1,4 +1,4 @@
-use bevy::{asset::AssetServer, ecs::component::Component, log::info_once};
+use bevy::ecs::component::Component;
 // Trait import required to call .random_range() on the RNG instance.
 // In Rust, trait methods are only available when the trait is in scope —
 // similar to how C# extension methods need a `using` for their namespace.

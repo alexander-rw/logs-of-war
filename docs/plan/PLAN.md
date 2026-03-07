@@ -36,7 +36,6 @@ Each milestone produces a playable slice of the game. M1-M5 is the MVP playable 
 - `Team` component (`TeamId`, `TeamColor`)
 - Spawn 2 teams x 4 characters each, positioned on opposite sides of the map
 - Replace flat cylinder with static terrain mesh (simple heightmap or tiled box terrain)
-- Wire `ShouldDespawn` to `LogCharacter::is_alive()` — characters despawn at 0 health
 - Health bar UI above each character (world-space billboard)
 
 ### 1.1 Team Component & Data Model
