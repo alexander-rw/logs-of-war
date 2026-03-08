@@ -52,7 +52,7 @@ If the code is not fully optimized before handing off to the user, you will be f
 - **NEVER** use emoji, or unicode that emulates emoji (e.g. ✓, ✗). The only exception is when writing tests and testing the impact of multibyte characters.
 - Use snake_case for functions/variables/modules, PascalCase for types/traits, SCREAMING_SNAKE_CASE for constants
 - Limit line length to 100 characters (rustfmt default)
-- Assume the user is a Python expert, but a Rust novice. Include additional code comments around Rust-specific nuances that a Python developer may not recognize.
+- Assume the user is a C# expert, but a Rust novice. Include additional code comments around Rust-specific nuances that a C# developer may not recognize.
 
 ## Documentation
 
@@ -196,7 +196,6 @@ pub fn calculate_total(items: &[Item], tax_rate: f64) -> Result<f64, Calculation
 - [ ] No compiler warnings (`cargo build`)
 - [ ] Clippy passes (`cargo clippy -- -D warnings`)
 - [ ] Code is formatted (`cargo fmt --check`)
-- [ ] If the project creates a Python package and Rust code is touched, rebuild the Python package (`source .venv/bin/activate && maturin develop --release --features python`)
 - [ ] If the project creates a WASM package and Rust code is touched, rebuild the WASM package (`wasm-pack build --target web --out-dir web/pkg`)
 - [ ] All public items have doc comments
 - [ ] No commented-out code or debug statements

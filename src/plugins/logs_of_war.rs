@@ -84,15 +84,9 @@ fn countdown(
     mut game_state: ResMut<NextState<GameState>>,
     mut inner_game_state: ResMut<NextState<LogsOfWarGameState>>,
     mut timer: ResMut<GameTimer>,
-    mut query: Query<(Entity, &mut LogCharacter)>,
     time: Res<Time>,
 ) {
     if timer.tick(time.delta()).is_finished() {
-        for (entity, mut log_char) in query.iter_mut() {
-            info!("Found e: {0}, {1}", entity.index_u32(), log_char.name);
-            log_char.take_damage(100);
-            info!("Health: {0}, {1}", log_char.name, log_char.health);
-        }
         inner_game_state.set(LogsOfWarGameState::Stopped);
         game_state.set(GameState::Menu);
     }
