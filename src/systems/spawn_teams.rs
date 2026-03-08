@@ -7,7 +7,7 @@ use avian3d::prelude::{Collider, RigidBody};
 use bevy::prelude::*;
 
 use crate::components::team::{Team, TeamId};
-use crate::entities::character::tree_character::TreeCharacter;
+use crate::components::character::TreeCharacter;
 use crate::resources::game_state::GameState;
 use crate::resources::terrain_config::TerrainConfig;
 

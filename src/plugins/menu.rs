@@ -6,7 +6,7 @@ use bevy::{
 };
 
 use crate::resources::display_quality::DisplayQuality;
-use crate::resources::{colors::DEFAULT_TEXT_COLOR, game_state_event::GameStateEvent, game_state::GameState};
+use crate::resources::{DEFAULT_TEXT_COLOR, game_state::GameState, game_state::GameStateEvent};
 
 // This plugin manages the menu, with 5 different screens:
 // - a main menu with "New Game", "Settings", "Quit"

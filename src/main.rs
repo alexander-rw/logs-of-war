@@ -2,10 +2,8 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 
 mod components;
-mod entities;
 mod plugins;
 mod resources;
-mod setup;
 mod systems;
 
 use crate::plugins::*;
@@ -25,5 +23,5 @@ fn main() {
         map_battle::MapBattlePlugin,
     );
 
-    App::new().add_plugins(app_plugins).add_systems(Startup, setup::setup_system).init_state::<GameState>().run();
+    App::new().add_plugins(app_plugins).add_systems(Startup, systems::setup::setup_system).init_state::<GameState>().run();
 }

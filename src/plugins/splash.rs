@@ -8,7 +8,7 @@ struct OnSplashScreen;
 #[derive(Resource, Deref, DerefMut)]
 struct SplashTimer(Timer);
 
-use crate::resources::{game_state_event::GameStateEvent, game_state::GameState};
+use crate::resources::game_state::{GameState, GameStateEvent};
 
 // This plugin will display a splash screen with Bevy logo for 2 seconds before switching to the menu
 pub fn splash_plugin(app: &mut App) {

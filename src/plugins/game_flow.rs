@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 use crate::resources::{
-    game_state_event::GameStateEvent,
-    game_state::GameState,
+    game_state::{GameState, GameStateEvent},
     map_selection::MapSelection,
 };
 

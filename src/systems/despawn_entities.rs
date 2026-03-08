@@ -6,7 +6,7 @@ use bevy::{
     log::warn_once,
 };
 
-use crate::entities::character::tree_character::TreeCharacter;
+use crate::components::character::TreeCharacter;
 
 pub fn despawn_on_zero_health(mut commands: Commands, query: Query<(Entity, &TreeCharacter)>) {
     for (entity, log_char) in query.iter() {

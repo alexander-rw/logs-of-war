@@ -15,8 +15,7 @@ use bevy::{
 
 use crate::{
     components::game_camera::GameCamera,
-    resources::game_state_event::GameStateEvent,
-    resources::game_state::GameState,
+    resources::game_state::{GameState, GameStateEvent},
     resources::map_selection::MapSelection,
     resources::terrain_config::TerrainConfig,
     systems::despawn_entities::despawn_on_zero_health,

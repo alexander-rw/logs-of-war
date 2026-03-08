@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 
 use crate::resources::{
-    colors::DEFAULT_TEXT_COLOR,
-    game_state_event::GameStateEvent,
-    game_state::GameState,
+    DEFAULT_TEXT_COLOR,
+    game_state::{GameState, GameStateEvent},
     map_selection::MapSelection,
 };
 
