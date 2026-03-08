@@ -2,7 +2,7 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 
 mod components;
-mod log_character;
+mod entities;
 mod plugins;
 mod resources;
 mod setup;
@@ -15,13 +15,15 @@ fn main() {
     let app_default_plugin = DefaultPlugins
         .set(WindowPlugin { primary_window: Some(Window { title: "Logs Of War".into(), ..default() }), ..default() });
 
-    let app_plugins = (app_default_plugin, PhysicsPlugins::default());
+    let app_plugins = (
+        app_default_plugin,
+        PhysicsPlugins::default(),
+        game_flow::game_flow_plugin,
+        splash::splash_plugin,
+        menu::menu_plugin,
+        map_settings::map_setting_plugin,
+        map_battle::MapBattlePlugin,
+    );
 
-    App::new()
-        .add_plugins(app_plugins)
-        .init_state::<GameState>()
-        .add_systems(Startup, setup::setup_system)
-         // Adds the plugins for each state
-        .add_plugins((splash::splash_plugin, menu::menu_plugin, logs_of_war::LogsOfWarPlugin))
-        .run();
+    App::new().add_plugins(app_plugins).add_systems(Startup, setup::setup_system).init_state::<GameState>().run();
 }

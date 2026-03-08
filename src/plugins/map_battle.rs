@@ -7,39 +7,39 @@ use bevy::{
     },
     prelude::*,
     state::{
-        app::AppExtStates,
         condition::in_state,
-        state::{NextState, OnEnter},
+        state::OnEnter,
     },
     time::{Time, Timer, TimerMode},
 };
 
 use crate::{
     components::game_camera::GameCamera,
-    log_character::log_character::LogCharacter,
-    resources::game_state::{GameState, LogsOfWarGameState},
+    resources::game_state_event::GameStateEvent,
+    resources::game_state::GameState,
+    resources::map_selection::MapSelection,
     resources::terrain_config::TerrainConfig,
-    systems::despawn_on_should_despawn_true::despawn_character,
+    systems::despawn_entities::despawn_on_zero_health,
     systems::spawn_teams::spawn_teams,
     systems::terrain::spawn_terrain,
 };
 
-pub struct LogsOfWarPlugin;
+pub struct MapBattlePlugin;
 
 #[derive(Resource, Deref, DerefMut)]
 struct GameTimer(Timer);
 
-impl Plugin for LogsOfWarPlugin {
+impl Plugin for MapBattlePlugin {
     fn build(&self, app: &mut App) {
-        // Insert TerrainConfig resource with default values
         app.insert_resource(TerrainConfig::default());
+        app.insert_resource(MapSelection::default());
 
-        app.init_state::<LogsOfWarGameState>()
-            .add_systems(OnEnter(GameState::Game), (spawn_terrain, spawn_teams, game_setup))
+        app
+            .add_systems(OnEnter(GameState::Game), (spawn_terrain, spawn_teams, map_battle_setup))
             .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Game)))
-            .add_systems(FixedUpdate, despawn_character);
+            .add_systems(FixedUpdate, despawn_on_zero_health);
 
-        self.ready(app);
+        self.finish(app);
     }
 
     fn ready(&self, _app: &App) -> bool {
@@ -47,11 +47,11 @@ impl Plugin for LogsOfWarPlugin {
     }
 
     fn finish(&self, _app: &mut App) {
-        info!("Finish::LogsOfWarPlugin");
+        info!("Finish::MapBattlePlugin");
     }
 
     fn cleanup(&self, _app: &mut App) {
-        info!("Cleanup::LogsOfWarPlugin");
+        info!("Cleanup::MapBattlePlugin");
     }
 
     fn name(&self) -> &str {
@@ -64,7 +64,7 @@ impl Plugin for LogsOfWarPlugin {
 }
 
 /// Sets up game lighting and timer.
-fn game_setup(mut commands: Commands) {
+fn map_battle_setup(mut commands: Commands) {
     info_once!("Setting up Logs of War game state");
 
     // Point light for scene illumination
@@ -81,14 +81,12 @@ fn game_setup(mut commands: Commands) {
 // Tick the timer, and change state when finished
 
 fn countdown(
-    mut game_state: ResMut<NextState<GameState>>,
-    mut inner_game_state: ResMut<NextState<LogsOfWarGameState>>,
+    mut game_state_writer: MessageWriter<GameStateEvent>,
     mut timer: ResMut<GameTimer>,
     time: Res<Time>,
 ) {
     if timer.tick(time.delta()).is_finished() {
-        inner_game_state.set(LogsOfWarGameState::Stopped);
-        game_state.set(GameState::Menu);
+        game_state_writer.write(GameStateEvent::GameComplete);
     }
 }
 

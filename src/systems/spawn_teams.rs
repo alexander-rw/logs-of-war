@@ -7,7 +7,7 @@ use avian3d::prelude::{Collider, RigidBody};
 use bevy::prelude::*;
 
 use crate::components::team::{Team, TeamId};
-use crate::log_character::log_character::LogCharacter;
+use crate::entities::character::tree_character::TreeCharacter;
 use crate::resources::game_state::GameState;
 use crate::resources::terrain_config::TerrainConfig;
 
@@ -58,7 +58,7 @@ fn spawn_log_soldier(
             Transform::from_translation(position),
             RigidBody::Dynamic,
             Collider::capsule(0.3, 1.2),
-            LogCharacter::generate(),
+            TreeCharacter::generate(),
             Team { id: team_id },
             DespawnOnExit(GameState::Game),
         ))

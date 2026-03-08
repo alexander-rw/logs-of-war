@@ -6,7 +6,7 @@ use bevy::{
 };
 
 use crate::resources::display_quality::DisplayQuality;
-use crate::resources::{colors::DEFAULT_TEXT_COLOR, game_state::GameState};
+use crate::resources::{colors::DEFAULT_TEXT_COLOR, game_state_event::GameStateEvent, game_state::GameState};
 
 // This plugin manages the menu, with 5 different screens:
 // - a main menu with "New Game", "Settings", "Quit"
@@ -323,8 +323,8 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
 fn menu_action(
     interaction_query: Query<(&Interaction, &MenuButtonAction), (Changed<Interaction>, With<Button>)>,
     mut app_exit_writer: MessageWriter<AppExit>,
+    mut game_state_writer: MessageWriter<GameStateEvent>,
     mut menu_state: ResMut<NextState<MenuState>>,
-    mut game_state: ResMut<NextState<GameState>>,
 ) {
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
@@ -333,7 +333,7 @@ fn menu_action(
                     app_exit_writer.write(AppExit::Success);
                 }
                 MenuButtonAction::Play => {
-                    game_state.set(GameState::Game);
+                    game_state_writer.write(GameStateEvent::PlayRequested);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Settings => menu_state.set(MenuState::Settings),

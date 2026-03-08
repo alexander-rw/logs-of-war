@@ -1,11 +1,12 @@
 use bevy::ecs::component::Component;
+
 // Trait import required to call .random_range() on the RNG instance.
 // In Rust, trait methods are only available when the trait is in scope —
 // similar to how C# extension methods need a `using` for their namespace.
 use rand::Rng;
 
 #[derive(Component)]
-pub struct LogCharacter {
+pub struct TreeCharacter {
     pub name: String,
     pub health: i16,
 }
@@ -56,7 +57,6 @@ fn random_name() -> String {
         "John-Boy",
         "Jones",
         "Keanu",
-        "Le Cont",
         "Lederhos",
         "Mark",
         "Martyn",
@@ -88,11 +88,12 @@ fn random_name() -> String {
     names[index].to_string()
 }
 
-impl LogCharacter {
+impl TreeCharacter {
     pub fn generate() -> Self {
-        LogCharacter { name: random_name(), health: 100 }
+        TreeCharacter { name: random_name(), health: 100 }
     }
 
+    #[allow(unused)]
     pub fn take_damage(&mut self, damage: i16) {
         let health_diff = self.health - damage;
         self.health = std::cmp::max(0, health_diff);

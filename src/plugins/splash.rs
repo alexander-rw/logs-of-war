@@ -8,7 +8,7 @@ struct OnSplashScreen;
 #[derive(Resource, Deref, DerefMut)]
 struct SplashTimer(Timer);
 
-use crate::resources::game_state::GameState;
+use crate::resources::{game_state_event::GameStateEvent, game_state::GameState};
 
 // This plugin will display a splash screen with Bevy logo for 2 seconds before switching to the menu
 pub fn splash_plugin(app: &mut App) {
@@ -48,8 +48,8 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 // Tick the timer, and change state when finished
-fn countdown(mut game_state: ResMut<NextState<GameState>>, time: Res<Time>, mut timer: ResMut<SplashTimer>) {
+fn countdown(mut events: MessageWriter<GameStateEvent>, time: Res<Time>, mut timer: ResMut<SplashTimer>) {
     if timer.tick(time.delta()).is_finished() {
-        game_state.set(GameState::Menu);
+        events.write(GameStateEvent::SplashComplete);
     }
 }
