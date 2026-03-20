@@ -58,7 +58,7 @@ fn spawn_log_soldier(
             Transform::from_translation(position),
             RigidBody::Dynamic,
             Collider::capsule(0.3, 1.2),
-            TreeCharacter::generate(),
+            TreeCharacter::default(),
             Team { id: team_id },
             DespawnOnExit(GameState::Game),
         ))
