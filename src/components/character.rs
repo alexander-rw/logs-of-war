@@ -88,6 +88,12 @@ fn random_name() -> String {
     names[index].to_string()
 }
 
+impl Default for TreeCharacter {
+    fn default() -> Self {
+        TreeCharacter::generate()
+    }
+}
+
 impl TreeCharacter {
     pub fn generate() -> Self {
         TreeCharacter { name: random_name(), health: 100 }
