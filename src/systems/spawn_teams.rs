@@ -33,7 +33,7 @@ use crate::resources::terrain_config::TerrainConfig;
 // Note for Python developers: This function takes mutable references to
 // Commands and asset stores, allowing it to spawn entities and add assets.
 // The `&mut` means we're borrowing mutably - the caller retains ownership.
-fn spawn_log_soldier(
+fn spawn_tree_soldier(
     commands: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
@@ -99,7 +99,7 @@ pub fn spawn_teams(
         let positions = config.spawn_positions(team_id);
 
         for position in positions {
-            spawn_log_soldier(&mut commands, &mut meshes, &mut materials, position, team_id);
+            spawn_tree_soldier(&mut commands, &mut meshes, &mut materials, position, team_id);
         }
     }
 }

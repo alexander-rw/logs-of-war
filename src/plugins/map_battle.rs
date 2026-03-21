@@ -23,6 +23,9 @@ use crate::{
     systems::terrain::spawn_terrain,
 };
 
+#[cfg(debug_assertions)]
+use crate::systems::terrain::spawn_terrain_flat;
+
 pub struct MapBattlePlugin;
 
 #[derive(Resource, Deref, DerefMut)]
@@ -34,7 +37,10 @@ impl Plugin for MapBattlePlugin {
         app.insert_resource(MapSelection::default());
 
         app
-            .add_systems(OnEnter(GameState::Game), (spawn_terrain, spawn_teams, map_battle_setup))
+            .add_systems(
+                OnEnter(GameState::Game),
+                (spawn_terrain_for_selection, spawn_teams, map_battle_setup),
+            )
             .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Game)))
             .add_systems(FixedUpdate, despawn_on_zero_health);
 
@@ -62,22 +68,40 @@ impl Plugin for MapBattlePlugin {
     }
 }
 
+/// Dispatches to the correct terrain spawner based on the active [`MapSelection`].
+///
+/// The exhaustive `match` here is the compile-time safety mechanism — adding a
+/// new [`MapSelection`] variant without a corresponding arm causes a compile error.
+/// This is the Rust equivalent of a C# interface: the compiler rejects any variant
+/// that does not have an implementation wired up.
+fn spawn_terrain_for_selection(
+    selection: Res<MapSelection>,
+    commands: Commands,
+    meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<StandardMaterial>>,
+    config: Res<TerrainConfig>,
+) {
+    // Note for C# developers: this match is exhaustive by default in Rust.
+    // Any unhandled variant is a compile error, not a runtime exception.
+    match *selection {
+        MapSelection::Hills => spawn_terrain(commands, meshes, materials, config),
+        #[cfg(debug_assertions)]
+        MapSelection::TestingArea => spawn_terrain_flat(commands, meshes, materials),
+    }
+}
+
 /// Sets up game lighting and timer.
 fn map_battle_setup(mut commands: Commands) {
     info_once!("Setting up Logs of War game state");
 
-    // Point light for scene illumination
     commands.spawn((
         DespawnOnExit(GameState::Game),
         PointLight { shadows_enabled: true, ..default() },
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
 
-    // Timer for demo purposes (will be replaced by turn system)
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
 }
-// https://github.com/bevyengine/bevy/discussions/2658
-// Tick the timer, and change state when finished
 
 fn countdown(
     mut game_state_writer: MessageWriter<GameStateEvent>,
@@ -92,7 +116,6 @@ fn countdown(
 /// Positions the camera to view the entire battlefield from an elevated angle.
 fn update_camera(mut q: Query<&mut Transform, (With<Camera3d>, With<GameCamera>)>) {
     if let Ok(mut transform) = q.single_mut() {
-        // Elevated position looking down at center of terrain
         transform.translation = Vec3::new(0.0, 20.0, 25.0);
         transform.look_at(Vec3::ZERO, Vec3::Y);
     }
