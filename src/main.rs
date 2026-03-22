@@ -21,6 +21,7 @@ fn main() {
         menu::menu_plugin,
         map_settings::map_setting_plugin,
         map_battle::MapBattlePlugin,
+        physics_base_plugin::PhysicsBasePlugin,
     );
 
     App::new().add_plugins(app_plugins).add_systems(Startup, systems::setup::setup_system).init_state::<GameState>().run();
