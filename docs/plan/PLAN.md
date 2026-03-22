@@ -227,9 +227,6 @@ app.add_systems(
 
 ### 1.10 Testing Checklist
 
-- [ ] Two teams of 4 characters spawn on opposite sides
-- [ ] Characters are cylinder+sphere "log soldiers" with team colors
-- [ ] Terrain is visible and characters stand on it via physics
 - [ ] Health bars appear above each character
 - [ ] Health bars billboard toward camera
 - [ ] Damaging a character updates its health bar
