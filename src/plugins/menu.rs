@@ -41,6 +41,7 @@ pub fn menu_plugin(app: &mut App) {
 
 // State used for the current menu screen
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+#[allow(dead_code)]
 enum MenuState {
     Main,
     Settings,
@@ -73,6 +74,7 @@ struct SelectedOption;
 
 // All actions that can be triggered from a button click
 #[derive(Component)]
+#[allow(dead_code)]
 enum MenuButtonAction {
     Play,
     Settings,
@@ -84,6 +86,7 @@ enum MenuButtonAction {
 }
 
 // This system handles changing all buttons color based on mouse interaction
+#[allow(clippy::type_complexity)]
 fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, Option<&SelectedOption>),
@@ -102,6 +105,7 @@ fn button_system(
 
 // This system updates the settings when a new value for a setting is selected, and marks
 // the button as the one currently selected
+#[allow(clippy::type_complexity)]
 fn setting_button<T: Resource + Component + PartialEq + Copy>(
     interaction_query: Query<(&Interaction, &T, Entity), (Changed<Interaction>, With<Button>)>,
     selected_query: Single<(Entity, &mut BackgroundColor), With<SelectedOption>>,
@@ -292,17 +296,16 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
                         // Display a label for the current setting
                         Spawn((Text::new("Display Quality"), button_text_style())),
                         SpawnWith(move |parent: &mut ChildSpawner| {
-                            for quality_setting in [DisplayQuality::High] {
-                                let mut entity = parent.spawn((
-                                    Button,
-                                    Node { width: px(150), height: px(65), ..button_node() },
-                                    BackgroundColor(NORMAL_BUTTON),
-                                    quality_setting,
-                                    children![(Text::new(format!("{quality_setting:?}")), button_text_style(),)],
-                                ));
-                                if display_quality == quality_setting {
-                                    entity.insert(SelectedOption);
-                                }
+                            let quality_setting = DisplayQuality::High;
+                            let mut entity = parent.spawn((
+                                Button,
+                                Node { width: px(150), height: px(65), ..button_node() },
+                                BackgroundColor(NORMAL_BUTTON),
+                                quality_setting,
+                                children![(Text::new(format!("{quality_setting:?}")), button_text_style(),)],
+                            ));
+                            if display_quality == quality_setting {
+                                entity.insert(SelectedOption);
                             }
                         })
                     ))
@@ -320,6 +323,7 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
     ));
 }
 
+#[allow(clippy::type_complexity)]
 fn menu_action(
     interaction_query: Query<(&Interaction, &MenuButtonAction), (Changed<Interaction>, With<Button>)>,
     mut app_exit_writer: MessageWriter<AppExit>,

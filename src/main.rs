@@ -1,6 +1,5 @@
 use avian3d::prelude::*;
-use bevy::color::palettes::css::WHITE;
-use bevy::{log, prelude::*};
+use bevy::prelude::*;
 
 mod components;
 mod plugins;
@@ -37,17 +36,4 @@ pub fn setup(mut commands: Commands) {
         Transform::from_xyz(-8.5, 14.5, 19.0).looking_at(Vec3::ZERO, Vec3::Y),
         GameCamera,
     ));
-
-    // Light
-    // commands.spawn((
-    //     PointLight {
-    //         intensity: 2_000_000.0,
-    //         range: 500.0,
-    //         shadows_enabled: true,
-    //         ..default()
-    //     },
-    //     Transform::from_xyz(0.0, 35.0, 0.0),
-    // ));
-
-    commands.insert_resource(GlobalAmbientLight::default());
 }

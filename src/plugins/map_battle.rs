@@ -88,6 +88,16 @@ fn map_battle_setup(mut commands: Commands) {
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
 
+    commands.spawn(
+        DirectionalLight {
+            illuminance: light_consts::lux::OVERCAST_DAY,
+            shadows_enabled: true,
+            ..default()
+        }
+    );
+
+    // commands.insert_resource(GlobalAmbientLight::default());
+
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
 }
 
