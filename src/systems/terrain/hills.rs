@@ -84,9 +84,6 @@ pub fn spawn_terrain(
     config: Res<TerrainConfig>,
 ) {
     let terrain_mesh = generate_heightmap_mesh(config.size, config.subdivisions, config.height_scale);
-
-    // `if let ... else` is the Rust idiom for "unwrap or early-return".
-    // In C# this would be: if (collider == null) { log; return; }
     let Some(collider) = Collider::trimesh_from_mesh(&terrain_mesh) else {
         error!("Failed to create trimesh collider — terrain will not have physics");
         return;

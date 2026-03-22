@@ -377,5 +377,6 @@ Lumber-themed parody factions:
 - Sound effects: weapon fire, explosion, character hit, death, water splash
 - Background music per faction/map
 - Narration flavour text on game events (kill, turn start, victory)
+- 
 - Loading screen with asset progress indication
 - Fullscreen/windowed toggle wired to settings menu

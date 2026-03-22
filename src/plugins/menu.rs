@@ -234,8 +234,8 @@ fn settings_menu_setup(mut commands: Commands) {
             BackgroundColor(CRIMSON.into()),
             Children::spawn(SpawnIter(
                 [
-                    (MenuButtonAction::SettingsDisplay, "Display"),
-                    (MenuButtonAction::SettingsSound, "Sound"),
+                    // (MenuButtonAction::SettingsDisplay, "Display"),
+                    // (MenuButtonAction::SettingsSound, "Sound"),
                     (MenuButtonAction::BackToMainMenu, "Back"),
                 ]
                 .into_iter()

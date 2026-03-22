@@ -1,10 +1,18 @@
 use bevy::prelude::*;
 
+use crate::resources::terrain_config::TerrainConfig;
+use crate::systems::terrain::{spawn_terrain, spawn_terrain_flat};
+
 /// The map selected by the player before a battle.
 ///
 /// Each variant corresponds to a terrain generator in `src/systems/terrain/`.
-/// Adding a new variant requires a matching arm in `spawn_terrain_for_selection`
-/// (in `map_battle.rs`) — omitting it causes a compile error.
+/// Adding a new variant requires:
+/// - A new arm in [`MapSelection::generate`] (this file only)
+/// - A new arm in [`MapSelection::label`] (this file only)
+/// - A new arm in [`MapSelection::all_variants`] (this file only)
+/// - A new terrain module in `src/systems/terrain/`
+///
+/// `map_battle.rs` never needs to change.
 #[derive(Clone, Copy, PartialEq, Debug, Default, Resource)]
 pub enum MapSelection {
     #[default]
@@ -48,5 +56,30 @@ impl MapSelection {
         return &[Self::Hills, Self::TestingArea];
         #[cfg(not(debug_assertions))]
         return &[Self::Hills];
+    }
+
+    /// Spawns the terrain for the selected map.
+    ///
+    /// This is the single dispatch point for terrain generation — `map_battle.rs`
+    /// calls this and never needs to know which variant is active.
+    ///
+    /// # Arguments
+    ///
+    /// * `commands` - Bevy command buffer
+    /// * `meshes` - Mesh asset store
+    /// * `materials` - Material asset store
+    /// * `config` - Terrain configuration resource
+    pub fn generate(
+        &self,
+        commands: Commands,
+        meshes: ResMut<Assets<Mesh>>,
+        materials: ResMut<Assets<StandardMaterial>>,
+        config: Res<TerrainConfig>,
+    ) {
+        match self {
+            Self::Hills => spawn_terrain(commands, meshes, materials, config),
+            #[cfg(debug_assertions)]
+            Self::TestingArea => spawn_terrain_flat(commands, meshes, materials),
+        }
     }
 }

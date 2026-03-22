@@ -20,11 +20,7 @@ use crate::{
     resources::terrain_config::TerrainConfig,
     systems::despawn_entities::despawn_on_zero_health,
     systems::spawn_teams::spawn_teams,
-    systems::terrain::spawn_terrain,
 };
-
-#[cfg(debug_assertions)]
-use crate::systems::terrain::spawn_terrain_flat;
 
 pub struct MapBattlePlugin;
 
@@ -68,12 +64,10 @@ impl Plugin for MapBattlePlugin {
     }
 }
 
-/// Dispatches to the correct terrain spawner based on the active [`MapSelection`].
+/// Spawns the terrain for the active [`MapSelection`].
 ///
-/// The exhaustive `match` here is the compile-time safety mechanism — adding a
-/// new [`MapSelection`] variant without a corresponding arm causes a compile error.
-/// This is the Rust equivalent of a C# interface: the compiler rejects any variant
-/// that does not have an implementation wired up.
+/// Dispatch lives in [`MapSelection::generate`] — this system never needs to
+/// change when new map variants are added.
 fn spawn_terrain_for_selection(
     selection: Res<MapSelection>,
     commands: Commands,
@@ -81,13 +75,7 @@ fn spawn_terrain_for_selection(
     materials: ResMut<Assets<StandardMaterial>>,
     config: Res<TerrainConfig>,
 ) {
-    // Note for C# developers: this match is exhaustive by default in Rust.
-    // Any unhandled variant is a compile error, not a runtime exception.
-    match *selection {
-        MapSelection::Hills => spawn_terrain(commands, meshes, materials, config),
-        #[cfg(debug_assertions)]
-        MapSelection::TestingArea => spawn_terrain_flat(commands, meshes, materials),
-    }
+    selection.generate(commands, meshes, materials, config);
 }
 
 /// Sets up game lighting and timer.

@@ -22,11 +22,11 @@ impl Plugin for PhysicsBasePlugin {
     }
 
     fn finish(&self, _app: &mut App) {
-        info!("Finish::{0}", self.name());
+        info!("{0}::Finish", self.name());
     }
 
     fn cleanup(&self, _app: &mut App) {
-        info!("Cleanup::");
+        info!("{0}::Cleanup", self.name());
     }
 
     fn name(&self) -> &str {
