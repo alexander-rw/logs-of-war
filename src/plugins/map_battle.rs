@@ -35,7 +35,10 @@ impl Plugin for MapBattlePlugin {
         app
             .add_systems(
                 OnEnter(GameState::Game),
-                (spawn_terrain_for_selection, spawn_teams, map_battle_setup),
+                (
+                    setup_spawn_config,
+                    (spawn_terrain_for_selection, spawn_teams, map_battle_setup).after(setup_spawn_config),
+                ),
             )
             .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Game)))
             .add_systems(FixedUpdate, despawn_on_zero_health);
@@ -64,6 +67,17 @@ impl Plugin for MapBattlePlugin {
     }
 }
 
+/// Builds and inserts [`SpawnConfig`] from the active [`MapSelection`].
+///
+/// Must run before [`spawn_teams`] in `OnEnter(GameState::Game)`.
+fn setup_spawn_config(
+    mut commands: Commands,
+    selection: Res<MapSelection>,
+    terrain: Res<TerrainConfig>,
+) {
+    commands.insert_resource(selection.spawn_config(&terrain));
+}
+
 /// Spawns the terrain for the active [`MapSelection`].
 ///
 /// Dispatch lives in [`MapSelection::generate`] — this system never needs to
@@ -88,15 +102,7 @@ fn map_battle_setup(mut commands: Commands) {
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
 
-    commands.spawn(
-        DirectionalLight {
-            illuminance: light_consts::lux::OVERCAST_DAY,
-            shadows_enabled: true,
-            ..default()
-        }
-    );
-
-    // commands.insert_resource(GlobalAmbientLight::default());
+    commands.insert_resource(GlobalAmbientLight { brightness: 160.0, ..default() });
 
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
 }

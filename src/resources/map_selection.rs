@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::components::team::TeamId;
+use crate::resources::spawn_config::{SpawnConfig, TeamConfig};
 use crate::resources::terrain_config::TerrainConfig;
 use crate::systems::terrain::{spawn_terrain, spawn_terrain_flat};
 
@@ -10,6 +12,7 @@ use crate::systems::terrain::{spawn_terrain, spawn_terrain_flat};
 /// - A new arm in [`MapSelection::generate`] (this file only)
 /// - A new arm in [`MapSelection::label`] (this file only)
 /// - A new arm in [`MapSelection::all_variants`] (this file only)
+/// - A new arm in [`MapSelection::spawn_config`] (this file only)
 /// - A new terrain module in `src/systems/terrain/`
 ///
 /// `map_battle.rs` never needs to change.
@@ -56,6 +59,29 @@ impl MapSelection {
         return &[Self::Hills, Self::TestingArea];
         #[cfg(not(debug_assertions))]
         return &[Self::Hills];
+    }
+
+    /// Returns the spawn configuration for this map: which teams exist and
+    /// where each player spawns. `map_battle.rs` inserts this as a resource
+    /// before `spawn_teams` runs.
+    pub fn spawn_config(&self, terrain: &TerrainConfig) -> SpawnConfig {
+        match self {
+            Self::Hills => SpawnConfig {
+                teams: vec![
+                    TeamConfig { team_id: TeamId::Red, positions: terrain.spawn_positions(TeamId::Red) },
+                    TeamConfig { team_id: TeamId::Blue, positions: terrain.spawn_positions(TeamId::Blue) },
+                ],
+            },
+            #[cfg(debug_assertions)]
+            Self::TestingArea => SpawnConfig {
+                teams: vec![
+                    TeamConfig {
+                        team_id: TeamId::Blue,
+                        positions: vec![Vec3::new(0.0, terrain.spawn_height, 0.0)],
+                    },
+                ],
+            },
+        }
     }
 
     /// Spawns the terrain for the selected map.

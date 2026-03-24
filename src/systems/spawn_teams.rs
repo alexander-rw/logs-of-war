@@ -9,7 +9,7 @@ use bevy::prelude::*;
 use crate::components::team::{Team, TeamId};
 use crate::components::character::TreeCharacter;
 use crate::resources::game_state::GameState;
-use crate::resources::terrain_config::TerrainConfig;
+use crate::resources::spawn_config::SpawnConfig;
 
 /// Spawns a soldier entity with mesh, collider, and components.
 ///
@@ -61,28 +61,17 @@ fn spawn_tree_soldier(
 
 /// Spawns all teams with their characters at configured positions.
 ///
-/// Reads spawn positions from [`TerrainConfig`] and creates log soldiers
-/// for both Red and Blue teams.
-///
-/// # Arguments
-///
-/// * `commands` - Bevy command buffer
-/// * `meshes` - Mesh asset store
-/// * `materials` - Material asset store
-/// * `config` - Terrain configuration with spawn positions
+/// Reads from [`SpawnConfig`], which is built per-map by
+/// [`crate::resources::map_selection::MapSelection::spawn_config`].
 pub fn spawn_teams(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    config: Res<TerrainConfig>,
+    config: Res<SpawnConfig>,
 ) {
-    // Spawn both teams
-    for team_id in [TeamId::Red, TeamId::Blue] {
-        // Get spawn positions for this team from config
-        let positions = config.spawn_positions(team_id);
-
-        for position in positions {
-            spawn_tree_soldier(&mut commands, &mut meshes, &mut materials, position, team_id);
+    for team in &config.teams {
+        for &position in &team.positions {
+            spawn_tree_soldier(&mut commands, &mut meshes, &mut materials, position, team.team_id);
         }
     }
 }
