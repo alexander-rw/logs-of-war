@@ -80,13 +80,22 @@ impl MapSelection {
                     },
                 ],
             },
+            // One character per team on flat ground: Blue is keyboard-driven
+            // (WASD + Space), Red stands as a static reference.
             #[cfg(debug_assertions)]
             Self::TestingArea => SpawnConfig {
-                teams: vec![TeamConfig {
-                    team_id: TeamId::Blue,
-                    positions: vec![Vec3::new(0.0, terrain.spawn_height, 0.0)],
-                    player_controlled: false,
-                }],
+                teams: vec![
+                    TeamConfig {
+                        team_id: TeamId::Red,
+                        positions: vec![Vec3::new(-4.0, terrain.spawn_height, 0.0)],
+                        player_controlled: false,
+                    },
+                    TeamConfig {
+                        team_id: TeamId::Blue,
+                        positions: vec![Vec3::new(4.0, terrain.spawn_height, 0.0)],
+                        player_controlled: true,
+                    },
+                ],
             },
         }
     }
