@@ -6,6 +6,9 @@ use crate::components::team::TeamId;
 pub struct TeamConfig {
     pub team_id: TeamId,
     pub positions: Vec<Vec3>,
+    /// When true, this team's characters receive the keyboard-driven
+    /// [`crate::components::controller::PlayerControlled`] marker.
+    pub player_controlled: bool,
 }
 
 /// Per-map spawn configuration, built from [`crate::resources::map_selection::MapSelection`]

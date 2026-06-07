@@ -68,8 +68,16 @@ impl MapSelection {
         match self {
             Self::Hills => SpawnConfig {
                 teams: vec![
-                    TeamConfig { team_id: TeamId::Red, positions: terrain.spawn_positions(TeamId::Red) },
-                    TeamConfig { team_id: TeamId::Blue, positions: terrain.spawn_positions(TeamId::Blue) },
+                    TeamConfig {
+                        team_id: TeamId::Red,
+                        positions: terrain.spawn_positions(TeamId::Red),
+                        player_controlled: false,
+                    },
+                    TeamConfig {
+                        team_id: TeamId::Blue,
+                        positions: terrain.spawn_positions(TeamId::Blue),
+                        player_controlled: false,
+                    },
                 ],
             },
             #[cfg(debug_assertions)]
@@ -77,6 +85,7 @@ impl MapSelection {
                 teams: vec![TeamConfig {
                     team_id: TeamId::Blue,
                     positions: vec![Vec3::new(0.0, terrain.spawn_height, 0.0)],
+                    player_controlled: false,
                 }],
             },
         }
