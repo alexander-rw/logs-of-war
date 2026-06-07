@@ -74,12 +74,10 @@ impl MapSelection {
             },
             #[cfg(debug_assertions)]
             Self::TestingArea => SpawnConfig {
-                teams: vec![
-                    TeamConfig {
-                        team_id: TeamId::Blue,
-                        positions: vec![Vec3::new(0.0, terrain.spawn_height, 0.0)],
-                    },
-                ],
+                teams: vec![TeamConfig {
+                    team_id: TeamId::Blue,
+                    positions: vec![Vec3::new(0.0, terrain.spawn_height, 0.0)],
+                }],
             },
         }
     }

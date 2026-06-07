@@ -6,8 +6,8 @@
 use avian3d::prelude::{Collider, RigidBody};
 use bevy::prelude::*;
 
-use crate::components::team::{Team, TeamId};
 use crate::components::character::TreeCharacter;
+use crate::components::team::{Team, TeamId};
 use crate::resources::game_state::GameState;
 use crate::resources::spawn_config::SpawnConfig;
 
@@ -45,18 +45,17 @@ fn spawn_tree_soldier(
     let material = materials.add(StandardMaterial { base_color: team_id.color(), ..default() });
 
     // Spawn the body as parent entity with physics
-    commands
-        .spawn((
-            Name::new(format!("{} Soldier", team_id.name())),
-            Mesh3d(body_mesh),
-            MeshMaterial3d(material.clone()),
-            Transform::from_translation(position),
-            RigidBody::Dynamic,
-            Collider::capsule(c.radius, c.half_height),
-            TreeCharacter::default(),
-            Team { id: team_id },
-            DespawnOnExit(GameState::Game),
-        ));
+    commands.spawn((
+        Name::new(format!("{} Soldier", team_id.name())),
+        Mesh3d(body_mesh),
+        MeshMaterial3d(material.clone()),
+        Transform::from_translation(position),
+        RigidBody::Dynamic,
+        Collider::capsule(c.radius, c.half_height),
+        TreeCharacter::default(),
+        Team { id: team_id },
+        DespawnOnExit(GameState::Game),
+    ));
 }
 
 /// Spawns all teams with their characters at configured positions.

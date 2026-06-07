@@ -6,10 +6,7 @@ use bevy::{
         system::{Commands, Res, ResMut},
     },
     prelude::*,
-    state::{
-        condition::in_state,
-        state::OnEnter,
-    },
+    state::{condition::in_state, state::OnEnter},
     time::{Time, Timer, TimerMode},
 };
 
@@ -32,16 +29,15 @@ impl Plugin for MapBattlePlugin {
         app.insert_resource(TerrainConfig::default());
         app.insert_resource(MapSelection::default());
 
-        app
-            .add_systems(
-                OnEnter(GameState::Game),
-                (
-                    setup_spawn_config,
-                    (spawn_terrain_for_selection, spawn_teams, map_battle_setup).after(setup_spawn_config),
-                ),
-            )
-            .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Game)))
-            .add_systems(FixedUpdate, despawn_on_zero_health);
+        app.add_systems(
+            OnEnter(GameState::Game),
+            (
+                setup_spawn_config,
+                (spawn_terrain_for_selection, spawn_teams, map_battle_setup).after(setup_spawn_config),
+            ),
+        )
+        .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Game)))
+        .add_systems(FixedUpdate, despawn_on_zero_health);
 
         self.finish(app);
     }
@@ -70,11 +66,7 @@ impl Plugin for MapBattlePlugin {
 /// Builds and inserts [`SpawnConfig`] from the active [`MapSelection`].
 ///
 /// Must run before [`spawn_teams`] in `OnEnter(GameState::Game)`.
-fn setup_spawn_config(
-    mut commands: Commands,
-    selection: Res<MapSelection>,
-    terrain: Res<TerrainConfig>,
-) {
+fn setup_spawn_config(mut commands: Commands, selection: Res<MapSelection>, terrain: Res<TerrainConfig>) {
     commands.insert_resource(selection.spawn_config(&terrain));
 }
 
@@ -107,11 +99,7 @@ fn map_battle_setup(mut commands: Commands) {
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
 }
 
-fn countdown(
-    mut game_state_writer: MessageWriter<GameStateEvent>,
-    mut timer: ResMut<GameTimer>,
-    time: Res<Time>,
-) {
+fn countdown(mut game_state_writer: MessageWriter<GameStateEvent>, mut timer: ResMut<GameTimer>, time: Res<Time>) {
     if timer.tick(time.delta()).is_finished() {
         game_state_writer.write(GameStateEvent::GameComplete);
     }

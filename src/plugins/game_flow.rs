@@ -6,8 +6,7 @@ use crate::resources::{
 };
 
 pub fn game_flow_plugin(app: &mut App) {
-    app.add_message::<GameStateEvent>()
-        .add_systems(Update, handle_game_flow_events);
+    app.add_message::<GameStateEvent>().add_systems(Update, handle_game_flow_events);
 }
 
 fn handle_game_flow_events(

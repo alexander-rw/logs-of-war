@@ -40,9 +40,7 @@ pub fn generate_heightmap_mesh(size: f32, subdivisions: u32, height_scale: f32) 
     // `if let Some(...)` safely unwraps an Option — like a null check in C# but
     // combined with a type cast. If the attribute exists and matches Float32x3,
     // we get mutable access to the positions array.
-    if let Some(VertexAttributeValues::Float32x3(positions)) =
-        mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION)
-    {
+    if let Some(VertexAttributeValues::Float32x3(positions)) = mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION) {
         for pos in positions.iter_mut() {
             // Combine two sine waves at different frequencies for natural-looking hills.
             // pos[0] is X, pos[2] is Z (Y is up in Bevy).

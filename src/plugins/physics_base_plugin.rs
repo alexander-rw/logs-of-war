@@ -1,5 +1,5 @@
-use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use avian3d::prelude::*;
+use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
 pub struct PhysicsBasePlugin;
 
@@ -12,7 +12,7 @@ impl Plugin for PhysicsBasePlugin {
                 step.run_if(physics_paused.and(input_just_pressed(KeyCode::Enter))),
             ),
         );
-            // .add_systems(FixedUpdate, ());
+        // .add_systems(FixedUpdate, ());
 
         self.finish(app);
     }

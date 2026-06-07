@@ -7,12 +7,10 @@ use crate::resources::{
 };
 
 pub fn map_setting_plugin(app: &mut App) {
-    app.add_systems(OnEnter(GameState::PreGame), map_setting_setup)
-        .add_systems(
-            Update,
-            (start_game_button_system, dropdown_toggle_system, dropdown_option_system)
-                .run_if(in_state(GameState::PreGame)),
-        );
+    app.add_systems(OnEnter(GameState::PreGame), map_setting_setup).add_systems(
+        Update,
+        (start_game_button_system, dropdown_toggle_system, dropdown_option_system).run_if(in_state(GameState::PreGame)),
+    );
 }
 
 // --- Components ---
@@ -114,11 +112,7 @@ fn map_setting_setup(mut commands: Commands) {
                     .spawn((
                         DropdownList,
                         Visibility::Hidden,
-                        Node {
-                            flex_direction: FlexDirection::Column,
-                            width: Val::Px(240.0),
-                            ..default()
-                        },
+                        Node { flex_direction: FlexDirection::Column, width: Val::Px(240.0), ..default() },
                         BackgroundColor(Color::srgb(0.13, 0.13, 0.16)),
                     ))
                     .with_children(|list| {
