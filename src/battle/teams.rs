@@ -12,6 +12,7 @@ use crate::character::controller::{
     SENSOR_RADIUS,
 };
 use crate::game::GameState;
+use crate::maps::Map;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum TeamId {
@@ -56,28 +57,25 @@ pub struct TeamConfig {
     pub player_controlled: bool,
 }
 
-/// Per-map spawn configuration, built from [`crate::maps::MapSelection`]
-/// before `OnEnter(GameState::Battle)` runs.
-///
-/// This is the runtime authority for who spawns where.
-#[derive(Resource)]
+/// Which teams start on a map, and where. Returned by [`Map::teams`].
 pub struct SpawnConfig {
     pub teams: Vec<TeamConfig>,
 }
 
-/// Spawns every team's characters from [`SpawnConfig`].
+/// Spawns every team's characters from the map's [`SpawnConfig`].
 ///
 /// All characters share one body mesh and one Tnua control-scheme config asset,
 /// and each team shares a single material. The team flagged
 /// [`TeamConfig::player_controlled`] also gets the [`PlayerControlled`] marker
 /// so keyboard input drives it.
-pub fn spawn_teams(
+pub fn spawn_teams<M: Map>(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut scheme_configs: ResMut<Assets<ControlSchemeConfig>>,
-    config: Res<SpawnConfig>,
 ) {
+    let config = M::teams();
+
     // Cylinder body shared by every soldier.
     let body_mesh = meshes.add(Cylinder { radius: BODY_RADIUS, half_height: BODY_HALF_HEIGHT });
 

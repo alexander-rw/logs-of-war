@@ -1,8 +1,12 @@
 //! The maps a battle can be fought on.
 //!
-//! Each [`MapSelection`] variant corresponds to one terrain module:
-//! - [`hills`] — procedural sine-wave heightmap (Hills map)
-//! - [`testing_area`] — flat cuboid (Testing Area, debug builds only)
+//! A map is a type that implements [`Map`]. To add one:
+//! - Write the `impl Map` in a new module here
+//! - Add a [`MapSelection`] variant, with its [`MapSelection::label`] arm and
+//!   its [`MapSelection::all_variants`] entry
+//! - Add a [`map_plugin`] line to [`maps_plugin`]
+//!
+//! The battle code never changes.
 
 pub mod hills;
 
@@ -11,18 +15,42 @@ pub mod testing_area;
 
 use bevy::prelude::*;
 
-use crate::battle::teams::{SpawnConfig, TeamConfig, TeamId};
+use crate::battle::teams::{SpawnConfig, TeamId, spawn_teams};
+use crate::game::GameState;
+
+/// One battlefield: its terrain and the teams that start on it.
+pub trait Map: Send + Sync + 'static {
+    /// The [`MapSelection`] variant that chooses this map.
+    const SELECTION: MapSelection;
+
+    /// Spawns the terrain of this map.
+    fn spawn_terrain(commands: Commands, meshes: ResMut<Assets<Mesh>>, materials: ResMut<Assets<StandardMaterial>>);
+
+    /// Returns which teams start on this map, and where.
+    fn teams() -> SpawnConfig;
+}
+
+/// Registers one map. Its systems run on entering a battle, but only when the
+/// player selected this map.
+pub fn map_plugin<M: Map>(app: &mut App) {
+    app.add_systems(
+        OnEnter(GameState::Battle),
+        (M::spawn_terrain, spawn_teams::<M>).run_if(resource_equals(M::SELECTION)),
+    );
+}
+
+/// Registers every map, and the selection that picks between them.
+///
+/// The selection is initialised once here, so it survives a return to the
+/// briefing screen.
+pub fn maps_plugin(app: &mut App) {
+    app.init_resource::<MapSelection>().add_plugins(map_plugin::<hills::Hills>);
+
+    #[cfg(debug_assertions)]
+    app.add_plugins(map_plugin::<testing_area::TestingArea>);
+}
 
 /// The map selected by the player before a battle.
-///
-/// Adding a new variant requires:
-/// - A new arm in [`MapSelection::generate`] (this file only)
-/// - A new arm in [`MapSelection::label`] (this file only)
-/// - A new arm in [`MapSelection::all_variants`] (this file only)
-/// - A new arm in [`MapSelection::spawn_config`] (this file only)
-/// - A new terrain module in `src/maps/`
-///
-/// `battle/mod.rs` never needs to change.
 #[derive(Clone, Copy, PartialEq, Debug, Default, Resource)]
 pub enum MapSelection {
     #[default]
@@ -56,84 +84,20 @@ impl MapSelection {
         #[cfg(not(debug_assertions))]
         return &[Self::Hills];
     }
-
-    /// Returns the spawn configuration for this map: which teams exist and
-    /// where each player spawns. `battle/mod.rs` inserts this as a resource
-    /// before `spawn_teams` runs.
-    pub fn spawn_config(&self, terrain: &TerrainConfig) -> SpawnConfig {
-        match self {
-            Self::Hills => SpawnConfig {
-                teams: vec![
-                    TeamConfig {
-                        team_id: TeamId::Red,
-                        positions: terrain.spawn_positions(TeamId::Red),
-                        player_controlled: false,
-                    },
-                    TeamConfig {
-                        team_id: TeamId::Blue,
-                        positions: terrain.spawn_positions(TeamId::Blue),
-                        player_controlled: false,
-                    },
-                ],
-            },
-            // One character per team on flat ground: Blue is keyboard-driven
-            // (WASD + Space), Red stands as a static reference.
-            #[cfg(debug_assertions)]
-            Self::TestingArea => SpawnConfig {
-                teams: vec![
-                    TeamConfig {
-                        team_id: TeamId::Red,
-                        positions: vec![Vec3::new(-4.0, terrain.spawn_height, 0.0)],
-                        player_controlled: false,
-                    },
-                    TeamConfig {
-                        team_id: TeamId::Blue,
-                        positions: vec![Vec3::new(4.0, terrain.spawn_height, 0.0)],
-                        player_controlled: true,
-                    },
-                ],
-            },
-        }
-    }
-
-    /// Spawns the terrain for the selected map.
-    ///
-    /// This is the single dispatch point for terrain generation — `battle/mod.rs`
-    /// calls this and never needs to know which variant is active.
-    pub fn generate(
-        &self,
-        commands: Commands,
-        meshes: ResMut<Assets<Mesh>>,
-        materials: ResMut<Assets<StandardMaterial>>,
-        config: Res<TerrainConfig>,
-    ) {
-        match self {
-            Self::Hills => hills::spawn_terrain(commands, meshes, materials, config),
-            #[cfg(debug_assertions)]
-            Self::TestingArea => testing_area::spawn_terrain_flat(commands, meshes, materials),
-        }
-    }
 }
 
-/// Configuration for terrain generation and team spawn positioning.
+/// The material every map's terrain uses.
+pub fn terrain_material() -> StandardMaterial {
+    StandardMaterial { base_color: Color::srgb(0.3, 0.5, 0.2), perceptual_roughness: 0.9, ..default() }
+}
+
+/// A line of spawn positions for one team, centred on the Z axis.
 ///
-/// This resource centralizes all world geometry parameters, making spawn
-/// locations tied to the terrain dimensions rather than hardcoded values.
-#[derive(Resource, Clone, Debug)]
-pub struct TerrainConfig {
-    /// Total width and depth of the terrain in world units.
-    /// The terrain extends from -size/2 to +size/2 on both X and Z axes.
-    pub size: f32,
-
-    /// Number of quad subdivisions per axis for mesh smoothness.
-    /// Higher values create smoother hills but more vertices.
-    pub subdivisions: u32,
-
-    /// Maximum hill height amplitude in world units.
-    pub height_scale: f32,
-
-    /// Distance from center (X=0) where teams spawn.
-    /// Red team spawns at -spawn_x_offset, Blue at +spawn_x_offset.
+/// A map that starts its teams in a line builds its positions with this; a map
+/// with only a handful of soldiers writes their positions out instead.
+pub struct FormationConfig {
+    /// Distance from centre (X=0) where the teams spawn.
+    /// Red spawns at -spawn_x_offset, Blue at +spawn_x_offset.
     pub spawn_x_offset: f32,
 
     /// Y position (height) where characters spawn.
@@ -147,24 +111,10 @@ pub struct TerrainConfig {
     pub z_spacing: f32,
 }
 
-impl Default for TerrainConfig {
-    fn default() -> Self {
-        Self {
-            size: 40.0,
-            subdivisions: 32,
-            height_scale: 1.5,
-            spawn_x_offset: 15.0,
-            spawn_height: 3.0,
-            team_size: 4,
-            z_spacing: 3.0,
-        }
-    }
-}
-
-impl TerrainConfig {
+impl FormationConfig {
     /// Returns spawn positions for all characters on a team.
     ///
-    /// Positions are centered along the Z axis and spaced according to
+    /// Positions are centred along the Z axis and spaced according to
     /// `z_spacing`. Red team spawns on negative X, Blue on positive X.
     #[must_use]
     pub fn spawn_positions(&self, team: TeamId) -> Vec<Vec3> {
@@ -193,30 +143,18 @@ impl TerrainConfig {
 mod tests {
     use super::*;
 
-    #[test]
-    fn default_config_has_expected_values() {
-        let config = TerrainConfig::default();
-        assert_eq!(config.size, 40.0);
-        assert_eq!(config.team_size, 4);
-        assert_eq!(config.spawn_x_offset, 15.0);
-    }
+    const FORMATION: FormationConfig =
+        FormationConfig { spawn_x_offset: 15.0, spawn_height: 3.0, team_size: 4, z_spacing: 3.0 };
 
     #[test]
-    fn spawn_positions_returns_correct_count() {
-        let config = TerrainConfig::default();
-        let red_positions = config.spawn_positions(TeamId::Red);
-        let blue_positions = config.spawn_positions(TeamId::Blue);
-
-        assert_eq!(red_positions.len(), 4);
-        assert_eq!(blue_positions.len(), 4);
+    fn spawn_positions_returns_one_position_per_soldier() {
+        assert_eq!(FORMATION.spawn_positions(TeamId::Red).len(), 4);
+        assert_eq!(FORMATION.spawn_positions(TeamId::Blue).len(), 4);
     }
 
     #[test]
     fn red_team_spawns_on_negative_x() {
-        let config = TerrainConfig::default();
-        let positions = config.spawn_positions(TeamId::Red);
-
-        for pos in positions {
+        for pos in FORMATION.spawn_positions(TeamId::Red) {
             assert_eq!(pos.x, -15.0);
             assert_eq!(pos.y, 3.0);
         }
@@ -224,10 +162,7 @@ mod tests {
 
     #[test]
     fn blue_team_spawns_on_positive_x() {
-        let config = TerrainConfig::default();
-        let positions = config.spawn_positions(TeamId::Blue);
-
-        for pos in positions {
+        for pos in FORMATION.spawn_positions(TeamId::Blue) {
             assert_eq!(pos.x, 15.0);
             assert_eq!(pos.y, 3.0);
         }
@@ -235,10 +170,8 @@ mod tests {
 
     #[test]
     fn spawn_positions_are_centered_on_z() {
-        let config = TerrainConfig::default();
-        let positions = config.spawn_positions(TeamId::Red);
-
         // With 4 characters and 3.0 spacing: -4.5, -1.5, +1.5, +4.5
+        let positions = FORMATION.spawn_positions(TeamId::Red);
         let z_values: Vec<f32> = positions.iter().map(|p| p.z).collect();
         assert_eq!(z_values, vec![-4.5, -1.5, 1.5, 4.5]);
     }

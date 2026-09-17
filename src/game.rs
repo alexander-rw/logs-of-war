@@ -5,6 +5,7 @@ use crate::battle::battle_plugin;
 use crate::briefing::briefing_plugin;
 use crate::camera::camera_plugin;
 use crate::character::controller::character_plugin;
+use crate::maps::maps_plugin;
 use crate::menu::menu_plugin;
 use crate::physics::physics_plugin;
 use crate::splash::splash_plugin;
@@ -35,6 +36,7 @@ pub fn game_plugin(app: &mut App) {
         splash_plugin,
         menu_plugin,
         briefing_plugin,
+        maps_plugin,
         battle_plugin,
         physics_plugin,
         character_plugin,

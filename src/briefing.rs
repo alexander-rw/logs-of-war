@@ -31,8 +31,8 @@ struct DropdownLabel;
 
 // --- Setup ---
 
-fn briefing_setup(mut commands: Commands) {
-    commands.insert_resource(MapSelection::default());
+fn briefing_setup(mut commands: Commands, map_selection: Res<MapSelection>) {
+    let selected_label = map_selection.label();
 
     // `.with_children()` rather than the `children![]` macro, because the
     // dropdown list is built by looping over `MapSelection::all_variants()`.
@@ -92,7 +92,7 @@ fn briefing_setup(mut commands: Commands) {
                         btn.spawn((
                             // `label()` gives us "Hills", "Testing Area", etc. — not the
                             // raw `Debug` format which would show "TestingArea".
-                            Text::new(MapSelection::default().label()),
+                            Text::new(selected_label),
                             TextFont { font_size: 24.0, ..default() },
                             TextColor(DEFAULT_TEXT_COLOR),
                             DropdownLabel,
