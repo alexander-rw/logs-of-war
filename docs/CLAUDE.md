@@ -14,6 +14,11 @@ All code you write MUST be fully optimized.
 
 If the code is not fully optimized before handing off to the user, you have permission to do another pass of the code if you believe it is not fully optimized.
 
+## Responses
+
+- **MUST** keep all answers to the user succinct
+- **MUST** write all answers to the user in ASD-STE100 Simplified Technical English
+
 ## Preferred Tools
 
 - Use `cargo` for project management, building, and dependency management.
@@ -34,14 +39,6 @@ If the code is not fully optimized before handing off to the user, you have perm
   - The typography/theming of the application **MUST** be modern and unique, similar to that of popular single-page web/mobile. **ALWAYS** add an appropriate font for headers and body text. You may reference fonts from Google Fonts.
   - **NEVER** use the Pico CSS defaults as-is: a separate CSS/SCSS file is encouraged. The design **MUST** logically complement the semantics of the application use case.
   - **ALWAYS** rebuild the WASM binary if any underlying Rust code that affects it is touched.
-  - **MUST** keep functions focused on a single responsibility
-  - **NEVER** use mutable objects (lists, dicts) as default argument values
-  - Limit function parameters to 5 or fewer
-  - Return early to reduce nesting
-  - **MUST** use type hints for all function signatures (parameters and return values)
-  - **NEVER** use `Any` type unless absolutely necessary
-  - **MUST** run mypy and resolve all type errors
-  - Use `Optional[T]` or `T | None` for nullable types
 
 ## Code Style and Formatting
 
@@ -50,8 +47,8 @@ If the code is not fully optimized before handing off to the user, you have perm
 - **MUST** use 4 spaces for indentation (never tabs)
 - **NEVER** use emoji, or unicode that emulates emoji (e.g. ✓, ✗). The only exception is when writing tests and testing the impact of multibyte characters.
 - Use snake_case for functions/variables/modules, PascalCase for types/traits, SCREAMING_SNAKE_CASE for constants
-- Limit line length to 100 characters (rustfmt default)
-- Assume the user is a C# expert, but an intermediate Rust engineer. Do not include comments related to C# or rust differences, but do explain differences in responses during comments
+- Limit line length to 120 characters (set by `max_width` in `rustfmt.toml`)
+- **NEVER** write comments that compare Rust to another language. Explain such differences in the response, not in the code.
 
 ## Documentation
 
@@ -112,6 +109,7 @@ If the code is not fully optimized before handing off to the user, you have perm
 - **NEVER** use `unsafe` unless absolutely necessary; document safety invariants when used
 - **MUST** call `.clone()` explicitly on non-`Copy` types; avoid hidden clones in closures and iterators
 - **MUST** use pattern matching exhaustively; avoid catch-all `_` patterns when possible
+- **MUST** give a complex query or generic type a type alias instead of `#[allow(clippy::type_complexity)]`
 - **MUST** use `format!` macro for string formatting
 - Use iterators and iterator adapters over manual loops
 - Use `enumerate()` instead of manual counter variables
@@ -146,6 +144,7 @@ If the code is not fully optimized before handing off to the user, you have perm
 - **MUST** write clear, descriptive commit messages
 - **NEVER** commit commented-out code; delete it
 - **NEVER** commit debug `println!` statements or `dbg!` macros
+- **NEVER** commit trace logs that only show that code ran, such as `info_once!("setup ran")`
 - **NEVER** commit credentials or sensitive data
 
 ## Tools
