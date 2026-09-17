@@ -44,7 +44,7 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 // Tick the timer, and change state when finished
 fn countdown(mut events: MessageWriter<GameStateEvent>, time: Res<Time>, mut timer: ResMut<SplashTimer>) {
-    if timer.tick(time.delta()).is_finished() {
+    if timer.tick(time.delta()).just_finished() {
         events.write(GameStateEvent::SplashComplete);
     }
 }

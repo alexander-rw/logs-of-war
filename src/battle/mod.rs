@@ -3,7 +3,6 @@ pub mod teams;
 use bevy::prelude::*;
 
 use crate::battle::teams::spawn_teams;
-use crate::camera::GameCamera;
 use crate::character::despawn_on_zero_health;
 use crate::game::{GameState, GameStateEvent};
 use crate::maps::{MapSelection, TerrainConfig};
@@ -19,7 +18,7 @@ pub fn battle_plugin(app: &mut App) {
         OnEnter(GameState::Battle),
         (setup_spawn_config, (spawn_terrain_for_selection, spawn_teams, map_battle_setup).after(setup_spawn_config)),
     )
-    .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Battle)))
+    .add_systems(Update, countdown.run_if(in_state(GameState::Battle)))
     .add_systems(FixedUpdate, despawn_on_zero_health);
 }
 
@@ -58,15 +57,7 @@ fn map_battle_setup(mut commands: Commands) {
 }
 
 fn countdown(mut game_state_writer: MessageWriter<GameStateEvent>, mut timer: ResMut<GameTimer>, time: Res<Time>) {
-    if timer.tick(time.delta()).is_finished() {
+    if timer.tick(time.delta()).just_finished() {
         game_state_writer.write(GameStateEvent::GameComplete);
-    }
-}
-
-/// Positions the camera to view the entire battlefield from an elevated angle.
-fn update_camera(mut q: Query<&mut Transform, (With<Camera3d>, With<GameCamera>)>) {
-    if let Ok(mut transform) = q.single_mut() {
-        transform.translation = Vec3::new(0.0, 20.0, 25.0);
-        transform.look_at(Vec3::ZERO, Vec3::Y);
     }
 }
