@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use crate::battle::battle_plugin;
 use crate::briefing::briefing_plugin;
 use crate::camera::camera_plugin;
-use crate::character::controller::character_plugin;
+use crate::character::character_plugin;
 use crate::maps::maps_plugin;
 use crate::menu::menu_plugin;
 use crate::physics::physics_plugin;

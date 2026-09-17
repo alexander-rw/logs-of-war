@@ -3,6 +3,15 @@ pub mod controller;
 use bevy::prelude::*;
 use rand::seq::IndexedRandom;
 
+use crate::character::controller::controller_plugin;
+use crate::game::GameState;
+
+/// Registers character control and the health rules.
+pub fn character_plugin(app: &mut App) {
+    app.add_plugins(controller_plugin)
+        .add_systems(FixedUpdate, despawn_on_zero_health.run_if(in_state(GameState::Battle)));
+}
+
 /// Health every soldier starts a battle with.
 const MAX_HEALTH: u16 = 100;
 
@@ -105,8 +114,8 @@ pub fn random_name() -> &'static str {
     NAMES.choose(&mut rand::rng()).expect("NAMES is never empty")
 }
 
-/// Despawns any soldier whose health has reached zero.
-pub fn despawn_on_zero_health(mut commands: Commands, query: Query<(Entity, &Health)>) {
+/// Despawns any soldier whose health has just reached zero.
+fn despawn_on_zero_health(mut commands: Commands, query: Query<(Entity, &Health), Changed<Health>>) {
     for (entity, health) in query.iter() {
         if !health.is_alive() {
             commands.entity(entity).despawn();

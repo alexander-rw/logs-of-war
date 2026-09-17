@@ -2,7 +2,6 @@ pub mod teams;
 
 use bevy::prelude::*;
 
-use crate::character::despawn_on_zero_health;
 use crate::game::GameState;
 
 #[derive(Resource, Deref, DerefMut)]
@@ -10,8 +9,7 @@ struct GameTimer(Timer);
 
 pub fn battle_plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Battle), map_battle_setup)
-        .add_systems(Update, countdown.run_if(in_state(GameState::Battle)))
-        .add_systems(FixedUpdate, despawn_on_zero_health);
+        .add_systems(Update, countdown.run_if(in_state(GameState::Battle)));
 }
 
 /// Sets up game lighting and timer.
