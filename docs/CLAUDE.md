@@ -8,12 +8,11 @@ All code you write MUST be fully optimized.
 
 "Fully optimized" includes:
 
-- maximizing algorithmic big-O efficiency for memory and runtime
-- using parallelization and SIMD where appropriate
+- maximizing algorithmic big-O efficiency for memory and runtime, where possible
 - following proper style conventions for Rust (e.g. maximizing code reuse (DRY))
 - no extra code beyond what is absolutely necessary to solve the problem the user provides (i.e. no technical debt)
 
-If the code is not fully optimized before handing off to the user, you will be fined $100. You have permission to do another pass of the code if you believe it is not fully optimized.
+If the code is not fully optimized before handing off to the user, you have permission to do another pass of the code if you believe it is not fully optimized.
 
 ## Preferred Tools
 
@@ -52,43 +51,11 @@ If the code is not fully optimized before handing off to the user, you will be f
 - **NEVER** use emoji, or unicode that emulates emoji (e.g. ✓, ✗). The only exception is when writing tests and testing the impact of multibyte characters.
 - Use snake_case for functions/variables/modules, PascalCase for types/traits, SCREAMING_SNAKE_CASE for constants
 - Limit line length to 100 characters (rustfmt default)
-- Assume the user is a C# expert, but a Rust novice. Include additional code comments around Rust-specific nuances that a C# developer may not recognize.
+- Assume the user is a C# expert, but an intermediate Rust engineer. Do not include comments related to C# or rust differences, but do explain differences in responses during comments
 
 ## Documentation
 
-- **MUST** include doc comments for all public functions, structs, enums, and methods
-- **MUST** document function parameters, return values, and errors
-- Keep comments up-to-date with code changes
-- Include examples in doc comments for complex functions
-
-Example doc comment:
-
-````rust
-/// Calculate the total cost of items including tax.
-///
-/// # Arguments
-///
-/// * `items` - Slice of item structs with price fields
-/// * `tax_rate` - Tax rate as decimal (e.g., 0.08 for 8%)
-///
-/// # Returns
-///
-/// Total cost including tax
-///
-/// # Errors
-///
-/// Returns `CalculationError::EmptyItems` if items is empty
-/// Returns `CalculationError::InvalidTaxRate` if tax_rate is negative
-///
-/// # Examples
-///
-/// ```
-/// let items = vec![Item { price: 10.0 }, Item { price: 20.0 }];
-/// let total = calculate_total(&items, 0.08)?;
-/// assert_eq!(total, 32.40);
-/// ```
-pub fn calculate_total(items: &[Item], tax_rate: f64) -> Result<f64, CalculationError> {
-````
+- Keep comments up-to-date with code changes if applicable
 
 ## Type System
 
@@ -188,7 +155,7 @@ pub fn calculate_total(items: &[Item], tax_rate: f64) -> Result<f64, Calculation
 - **MUST** ensure code compiles with no warnings (use `-D warnings` flag in CI, not `#![deny(warnings)]` in source)
 - Use `cargo` for building, testing, and dependency management
 - Use `cargo test` for running tests
-- Use `cargo doc` for generating documentation
+- Use `cargo doc` for generating documentation, although this should not be run by claude unless specifically asked
 
 ## Before Committing
 
@@ -196,9 +163,7 @@ pub fn calculate_total(items: &[Item], tax_rate: f64) -> Result<f64, Calculation
 - [ ] No compiler warnings (`cargo build`)
 - [ ] Clippy passes (`cargo clippy -- -D warnings`)
 - [ ] Code is formatted (`cargo fmt --check`)
-- [ ] If the project creates a WASM package and Rust code is touched, rebuild the WASM package (`wasm-pack build --target web --out-dir web/pkg`)
 - [ ] All public items have doc comments
-- [ ] No commented-out code or debug statements
 - [ ] No hardcoded credentials
 
 ---
