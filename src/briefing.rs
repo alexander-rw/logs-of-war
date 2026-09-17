@@ -1,15 +1,14 @@
 use bevy::prelude::*;
 
-use crate::resources::{
-    DEFAULT_TEXT_COLOR,
-    game_state::{GameState, GameStateEvent},
-    map_selection::MapSelection,
-};
+use crate::game::{GameState, GameStateEvent};
+use crate::maps::MapSelection;
+use crate::ui::DEFAULT_TEXT_COLOR;
 
-pub fn map_setting_plugin(app: &mut App) {
-    app.add_systems(OnEnter(GameState::PreGame), map_setting_setup).add_systems(
+pub fn briefing_plugin(app: &mut App) {
+    app.add_systems(OnEnter(GameState::Briefing), briefing_setup).add_systems(
         Update,
-        (start_game_button_system, dropdown_toggle_system, dropdown_option_system).run_if(in_state(GameState::PreGame)),
+        (start_game_button_system, dropdown_toggle_system, dropdown_option_system)
+            .run_if(in_state(GameState::Briefing)),
     );
 }
 
@@ -32,14 +31,14 @@ struct DropdownLabel;
 
 // --- Setup ---
 
-fn map_setting_setup(mut commands: Commands) {
+fn briefing_setup(mut commands: Commands) {
     commands.insert_resource(MapSelection::default());
 
     // `.with_children()` rather than the `children![]` macro, because the
     // dropdown list is built by looping over `MapSelection::all_variants()`.
     commands
         .spawn((
-            DespawnOnExit(GameState::PreGame),
+            DespawnOnExit(GameState::Briefing),
             Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),

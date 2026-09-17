@@ -1,4 +1,6 @@
-use bevy::ecs::component::Component;
+pub mod controller;
+
+use bevy::prelude::*;
 
 // Trait import required to call .random_range() on the RNG instance.
 use rand::Rng;
@@ -105,5 +107,15 @@ impl TreeCharacter {
 
     pub fn is_alive(&self) -> bool {
         self.health > 0
+    }
+}
+
+/// Despawns any character whose health has reached zero.
+pub fn despawn_on_zero_health(mut commands: Commands, query: Query<(Entity, &TreeCharacter)>) {
+    for (entity, character) in query.iter() {
+        warn_once!("Char id {0} ({1}), health: {2}", entity.index(), &character.name, &character.health);
+        if !character.is_alive() {
+            commands.entity(entity).despawn();
+        }
     }
 }

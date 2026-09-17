@@ -1,7 +1,4 @@
-//! Team spawning system.
-//!
-//! This module provides the system for spawning log soldier characters
-//! for each team at their designated positions.
+//! Teams and the system that spawns their soldiers.
 
 use avian3d::prelude::{Collider, LockedAxes, RigidBody};
 use bevy::prelude::*;
@@ -9,18 +6,68 @@ use bevy_tnua::builtins::{TnuaBuiltinJumpConfig, TnuaBuiltinWalkConfig};
 use bevy_tnua::prelude::{TnuaConfig, TnuaController};
 use bevy_tnua_avian3d::prelude::TnuaAvian3dSensorShape;
 
-use crate::components::character::TreeCharacter;
-use crate::components::controller::{ControlScheme, ControlSchemeConfig, FLOAT_HEIGHT, JUMP_HEIGHT, PlayerControlled};
-use crate::components::team::Team;
-use crate::resources::game_state::GameState;
-use crate::resources::spawn_config::SpawnConfig;
+use crate::character::TreeCharacter;
+use crate::character::controller::{ControlScheme, ControlSchemeConfig, FLOAT_HEIGHT, JUMP_HEIGHT, PlayerControlled};
+use crate::game::GameState;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum TeamId {
+    /// The red team, spawning on the negative X side of the map.
+    Red,
+    /// The blue team, spawning on the positive X side of the map.
+    Blue,
+}
+
+impl TeamId {
+    #[must_use]
+    pub fn color(&self) -> Color {
+        match self {
+            TeamId::Red => Color::srgb(0.85, 0.2, 0.2),  // Crimson red
+            TeamId::Blue => Color::srgb(0.2, 0.4, 0.85), // Royal blue
+        }
+    }
+
+    /// Returns a human-readable name for the team.
+    #[must_use]
+    pub fn name(&self) -> &'static str {
+        match self {
+            TeamId::Red => "Red Team",
+            TeamId::Blue => "Blue Team",
+        }
+    }
+}
+
+/// Component that identifies which team an entity belongs to.
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Team {
+    /// The team identifier for this entity.
+    pub id: TeamId,
+}
+
+/// Spawn positions and team assignment for a single team.
+pub struct TeamConfig {
+    pub team_id: TeamId,
+    pub positions: Vec<Vec3>,
+    /// When true, this team's characters receive the keyboard-driven
+    /// [`PlayerControlled`] marker.
+    pub player_controlled: bool,
+}
+
+/// Per-map spawn configuration, built from [`crate::maps::MapSelection`]
+/// before `OnEnter(GameState::Battle)` runs.
+///
+/// This is the runtime authority for who spawns where.
+#[derive(Resource)]
+pub struct SpawnConfig {
+    pub teams: Vec<TeamConfig>,
+}
 
 /// Spawns every team's characters from [`SpawnConfig`].
 ///
 /// All characters share one body mesh and one Tnua control-scheme config asset,
 /// and each team shares a single material. The team flagged
-/// [`crate::resources::spawn_config::TeamConfig::player_controlled`] also gets
-/// the [`PlayerControlled`] marker so keyboard input drives it.
+/// [`TeamConfig::player_controlled`] also gets the [`PlayerControlled`] marker
+/// so keyboard input drives it.
 pub fn spawn_teams(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -52,7 +99,7 @@ pub fn spawn_teams(
                 LockedAxes::ROTATION_LOCKED,
                 TreeCharacter::default(),
                 Team { id: team.team_id },
-                DespawnOnExit(GameState::Game),
+                DespawnOnExit(GameState::Battle),
                 (
                     TnuaController::<ControlScheme>::default(),
                     TnuaConfig::<ControlScheme>(scheme_config.clone()),

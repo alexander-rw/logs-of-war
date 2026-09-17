@@ -1,11 +1,17 @@
 use bevy::prelude::*;
 
-mod components;
-mod plugins;
-mod resources;
-mod systems;
+mod battle;
+mod briefing;
+mod camera;
+mod character;
+mod game;
+mod maps;
+mod menu;
+mod physics;
+mod splash;
+mod ui;
 
-use crate::plugins::game::GamePlugin;
+use crate::game::GamePlugin;
 
 fn main() {
     App::new().add_plugins(GamePlugin).run();

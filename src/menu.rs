@@ -5,8 +5,16 @@ use bevy::{
     prelude::*,
 };
 
-use crate::resources::display_quality::DisplayQuality;
-use crate::resources::{DEFAULT_TEXT_COLOR, game_state::GameState, game_state::GameStateEvent};
+use crate::game::{GameState, GameStateEvent};
+use crate::ui::DEFAULT_TEXT_COLOR;
+
+/// One of the two settings that can be set through the menu. It is a resource in the app.
+#[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
+pub enum DisplayQuality {
+    // Low,
+    // Medium,
+    High,
+}
 
 // This plugin manages the menu, with 5 different screens:
 // - a main menu with "New Game", "Settings", "Quit"

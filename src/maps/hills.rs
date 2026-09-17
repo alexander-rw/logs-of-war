@@ -7,8 +7,8 @@ use avian3d::prelude::{Collider, RigidBody};
 use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
 
-use crate::resources::game_state::GameState;
-use crate::resources::terrain_config::TerrainConfig;
+use crate::game::GameState;
+use crate::maps::TerrainConfig;
 
 /// Generates a heightmap terrain mesh with procedural sine-wave hills.
 ///
@@ -94,6 +94,6 @@ pub fn spawn_terrain(
         collider,
         Mesh3d(mesh_handle),
         MeshMaterial3d(terrain_material),
-        DespawnOnExit(GameState::Game),
+        DespawnOnExit(GameState::Battle),
     ));
 }

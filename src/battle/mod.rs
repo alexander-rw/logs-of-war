@@ -1,23 +1,12 @@
-use bevy::{
-    app::Update,
-    ecs::{
-        resource::Resource,
-        schedule::IntoScheduleConfigs,
-        system::{Commands, Res, ResMut},
-    },
-    prelude::*,
-    state::{condition::in_state, state::OnEnter},
-    time::{Time, Timer, TimerMode},
-};
+pub mod teams;
 
-use crate::{
-    components::game_camera::GameCamera,
-    resources::game_state::{GameState, GameStateEvent},
-    resources::map_selection::MapSelection,
-    resources::terrain_config::TerrainConfig,
-    systems::despawn_entities::despawn_on_zero_health,
-    systems::spawn_teams::spawn_teams,
-};
+use bevy::prelude::*;
+
+use crate::battle::teams::spawn_teams;
+use crate::camera::GameCamera;
+use crate::character::despawn_on_zero_health;
+use crate::game::{GameState, GameStateEvent};
+use crate::maps::{MapSelection, TerrainConfig};
 
 pub struct MapBattlePlugin;
 
@@ -30,13 +19,13 @@ impl Plugin for MapBattlePlugin {
         app.insert_resource(MapSelection::default());
 
         app.add_systems(
-            OnEnter(GameState::Game),
+            OnEnter(GameState::Battle),
             (
                 setup_spawn_config,
                 (spawn_terrain_for_selection, spawn_teams, map_battle_setup).after(setup_spawn_config),
             ),
         )
-        .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Game)))
+        .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Battle)))
         .add_systems(FixedUpdate, despawn_on_zero_health);
 
         self.finish(app);
@@ -63,9 +52,9 @@ impl Plugin for MapBattlePlugin {
     }
 }
 
-/// Builds and inserts [`SpawnConfig`] from the active [`MapSelection`].
+/// Builds and inserts [`crate::battle::teams::SpawnConfig`] from the active [`MapSelection`].
 ///
-/// Must run before [`spawn_teams`] in `OnEnter(GameState::Game)`.
+/// Must run before [`spawn_teams`] in `OnEnter(GameState::Battle)`.
 fn setup_spawn_config(mut commands: Commands, selection: Res<MapSelection>, terrain: Res<TerrainConfig>) {
     commands.insert_resource(selection.spawn_config(&terrain));
 }
@@ -87,7 +76,7 @@ fn spawn_terrain_for_selection(
 /// Sets up game lighting and timer.
 fn map_battle_setup(mut commands: Commands) {
     commands.spawn((
-        DespawnOnExit(GameState::Game),
+        DespawnOnExit(GameState::Battle),
         PointLight { shadows_enabled: true, ..default() },
         Transform::from_xyz(4.0, 8.0, 4.0),
     ));
