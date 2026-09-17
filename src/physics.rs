@@ -1,39 +1,14 @@
 use avian3d::prelude::*;
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 
-pub struct PhysicsBasePlugin;
-
-impl Plugin for PhysicsBasePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (
-                toggle_paused.run_if(input_just_pressed(KeyCode::Escape)),
-                step.run_if(physics_paused.and(input_just_pressed(KeyCode::Enter))),
-            ),
-        );
-        self.finish(app);
-    }
-
-    fn ready(&self, _app: &App) -> bool {
-        true
-    }
-
-    fn finish(&self, _app: &mut App) {
-        info!("{0}::Finish", self.name());
-    }
-
-    fn cleanup(&self, _app: &mut App) {
-        info!("{0}::Cleanup", self.name());
-    }
-
-    fn name(&self) -> &str {
-        core::any::type_name::<Self>()
-    }
-
-    fn is_unique(&self) -> bool {
-        true
-    }
+pub fn physics_plugin(app: &mut App) {
+    app.add_systems(
+        Update,
+        (
+            toggle_paused.run_if(input_just_pressed(KeyCode::Escape)),
+            step.run_if(physics_paused.and(input_just_pressed(KeyCode::Enter))),
+        ),
+    );
 }
 
 fn physics_paused(time: Res<Time<Physics>>) -> bool {

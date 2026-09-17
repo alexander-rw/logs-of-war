@@ -8,48 +8,19 @@ use crate::character::despawn_on_zero_health;
 use crate::game::{GameState, GameStateEvent};
 use crate::maps::{MapSelection, TerrainConfig};
 
-pub struct MapBattlePlugin;
-
 #[derive(Resource, Deref, DerefMut)]
 struct GameTimer(Timer);
 
-impl Plugin for MapBattlePlugin {
-    fn build(&self, app: &mut App) {
-        app.insert_resource(TerrainConfig::default());
-        app.insert_resource(MapSelection::default());
+pub fn battle_plugin(app: &mut App) {
+    app.insert_resource(TerrainConfig::default());
+    app.insert_resource(MapSelection::default());
 
-        app.add_systems(
-            OnEnter(GameState::Battle),
-            (
-                setup_spawn_config,
-                (spawn_terrain_for_selection, spawn_teams, map_battle_setup).after(setup_spawn_config),
-            ),
-        )
-        .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Battle)))
-        .add_systems(FixedUpdate, despawn_on_zero_health);
-
-        self.finish(app);
-    }
-
-    fn ready(&self, _app: &App) -> bool {
-        true
-    }
-
-    fn finish(&self, _app: &mut App) {
-        info!("Finish::MapBattlePlugin");
-    }
-
-    fn cleanup(&self, _app: &mut App) {
-        info!("Cleanup::MapBattlePlugin");
-    }
-
-    fn name(&self) -> &str {
-        core::any::type_name::<Self>()
-    }
-
-    fn is_unique(&self) -> bool {
-        true
-    }
+    app.add_systems(
+        OnEnter(GameState::Battle),
+        (setup_spawn_config, (spawn_terrain_for_selection, spawn_teams, map_battle_setup).after(setup_spawn_config)),
+    )
+    .add_systems(Update, (update_camera, countdown).run_if(in_state(GameState::Battle)))
+    .add_systems(FixedUpdate, despawn_on_zero_health);
 }
 
 /// Builds and inserts [`crate::battle::teams::SpawnConfig`] from the active [`MapSelection`].

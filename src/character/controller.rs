@@ -36,13 +36,9 @@ pub struct PlayerControlled;
 ///
 /// Both Tnua plugins run in `FixedUpdate` to match Avian's fixed-timestep
 /// simulation.
-pub struct CharacterControllerPlugin;
-
-impl Plugin for CharacterControllerPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugins((TnuaControllerPlugin::<ControlScheme>::new(FixedUpdate), TnuaAvian3dPlugin::new(FixedUpdate)))
-            .add_systems(Update, apply_controls.in_set(TnuaUserControlsSystems));
-    }
+pub fn character_plugin(app: &mut App) {
+    app.add_plugins((TnuaControllerPlugin::<ControlScheme>::new(FixedUpdate), TnuaAvian3dPlugin::new(FixedUpdate)))
+        .add_systems(Update, apply_controls.in_set(TnuaUserControlsSystems));
 }
 
 /// Walk direction contributed by each movement key. Bevy is Z-forward-negative,

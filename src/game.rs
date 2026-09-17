@@ -1,13 +1,13 @@
 use avian3d::prelude::*;
 use bevy::prelude::*;
 
-use crate::battle::MapBattlePlugin;
+use crate::battle::battle_plugin;
 use crate::briefing::briefing_plugin;
-use crate::camera::setup_camera;
-use crate::character::controller::CharacterControllerPlugin;
+use crate::camera::camera_plugin;
+use crate::character::controller::character_plugin;
 use crate::maps::MapSelection;
 use crate::menu::menu_plugin;
-use crate::physics::PhysicsBasePlugin;
+use crate::physics::physics_plugin;
 use crate::splash::splash_plugin;
 
 /// Enum that will be used as a global state for the game
@@ -33,27 +33,23 @@ pub enum GameStateEvent {
 /// `main` adds only this plugin; everything else (windowing, physics, game
 /// states, and all feature plugins) is wired up here so the entry point stays
 /// a one-liner and the plugin set lives in one readable place.
-pub struct GamePlugin;
-
-impl Plugin for GamePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugins((
-            DefaultPlugins.set(WindowPlugin {
-                primary_window: Some(Window { title: "Logs Of War".into(), ..default() }),
-                ..default()
-            }),
-            PhysicsPlugins::default(),
-            game_flow_plugin,
-            splash_plugin,
-            menu_plugin,
-            briefing_plugin,
-            MapBattlePlugin,
-            PhysicsBasePlugin,
-            CharacterControllerPlugin,
-        ))
-        .init_state::<GameState>()
-        .add_systems(Startup, setup_camera);
-    }
+pub fn game_plugin(app: &mut App) {
+    app.add_plugins((
+        DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window { title: "Logs Of War".into(), ..default() }),
+            ..default()
+        }),
+        PhysicsPlugins::default(),
+        game_flow_plugin,
+        camera_plugin,
+        splash_plugin,
+        menu_plugin,
+        briefing_plugin,
+        battle_plugin,
+        physics_plugin,
+        character_plugin,
+    ))
+    .init_state::<GameState>();
 }
 
 fn game_flow_plugin(app: &mut App) {

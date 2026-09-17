@@ -11,8 +11,8 @@ mod physics;
 mod splash;
 mod ui;
 
-use crate::game::GamePlugin;
+use crate::game::game_plugin;
 
 fn main() {
-    App::new().add_plugins(GamePlugin).run();
+    App::new().add_plugins(game_plugin).run();
 }
