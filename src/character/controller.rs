@@ -5,11 +5,30 @@ use bevy_tnua::builtins::{TnuaBuiltinJump, TnuaBuiltinWalk};
 use bevy_tnua::prelude::*;
 use bevy_tnua_avian3d::prelude::*;
 
+/// Radius of the soldier's cylinder body, in world units.
+pub const BODY_RADIUS: f32 = 0.3;
+
+/// Half the height of the soldier's cylinder body, in world units.
+///
+/// The capsule collider takes this value as its segment length, so the
+/// collider is shorter than the mesh.
+pub const BODY_HALF_HEIGHT: f32 = 0.6;
+
+/// Height of the hover gap between the bottom of the collider and the ground.
+const FLOAT_GAP: f32 = 0.4;
+
 /// Distance the character origin floats above the ground.
 ///
-/// Roughly the capsule half-extent (`half_height + radius`) plus a small hover
-/// gap, so the body rests just above the surface.
-pub const FLOAT_HEIGHT: f32 = 1.0;
+/// The capsule half-extent (half its segment length plus its radius) plus the
+/// hover gap, so the body rests just above the surface.
+pub const FLOAT_HEIGHT: f32 = BODY_HALF_HEIGHT / 2.0 + BODY_RADIUS + FLOAT_GAP;
+
+/// How much narrower the Tnua ground sensor is than the body, so that the
+/// sensor cannot catch on a wall the body is already clear of.
+const SENSOR_INSET: f32 = 0.01;
+
+/// Radius of the Tnua ground-sensor cylinder.
+pub const SENSOR_RADIUS: f32 = BODY_RADIUS - SENSOR_INSET;
 
 /// Peak height of a jump, in world units.
 pub const JUMP_HEIGHT: f32 = 3.0;

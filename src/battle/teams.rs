@@ -7,7 +7,10 @@ use bevy_tnua::prelude::{TnuaConfig, TnuaController};
 use bevy_tnua_avian3d::prelude::TnuaAvian3dSensorShape;
 
 use crate::character::TreeCharacter;
-use crate::character::controller::{ControlScheme, ControlSchemeConfig, FLOAT_HEIGHT, JUMP_HEIGHT, PlayerControlled};
+use crate::character::controller::{
+    BODY_HALF_HEIGHT, BODY_RADIUS, ControlScheme, ControlSchemeConfig, FLOAT_HEIGHT, JUMP_HEIGHT, PlayerControlled,
+    SENSOR_RADIUS,
+};
 use crate::game::GameState;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -75,9 +78,8 @@ pub fn spawn_teams(
     mut scheme_configs: ResMut<Assets<ControlSchemeConfig>>,
     config: Res<SpawnConfig>,
 ) {
-    // Cylinder body shared by every soldier; the capsule collider matches it.
-    let body = Cylinder::new(0.3, 1.2);
-    let body_mesh = meshes.add(body);
+    // Cylinder body shared by every soldier.
+    let body_mesh = meshes.add(Cylinder { radius: BODY_RADIUS, half_height: BODY_HALF_HEIGHT });
 
     // One control-scheme config asset tunes the basis and jump for all characters.
     let scheme_config = scheme_configs.add(ControlSchemeConfig {
@@ -95,7 +97,7 @@ pub fn spawn_teams(
                 MeshMaterial3d(material.clone()),
                 Transform::from_translation(position),
                 RigidBody::Dynamic,
-                Collider::capsule(body.radius, body.half_height),
+                Collider::capsule(BODY_RADIUS, BODY_HALF_HEIGHT),
                 LockedAxes::ROTATION_LOCKED,
                 TreeCharacter::default(),
                 Team { id: team.team_id },
@@ -103,7 +105,7 @@ pub fn spawn_teams(
                 (
                     TnuaController::<ControlScheme>::default(),
                     TnuaConfig::<ControlScheme>(scheme_config.clone()),
-                    TnuaAvian3dSensorShape(Collider::cylinder(body.radius - 0.01, 0.0)),
+                    TnuaAvian3dSensorShape(Collider::cylinder(SENSOR_RADIUS, 0.0)),
                 ),
             ));
 
