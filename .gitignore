@@ -28,3 +28,5 @@ target
 
 # claude
 .claude/
+# local planning notes
+/plans/
