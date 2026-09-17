@@ -1,6 +1,7 @@
 pub mod controller;
 
 use bevy::prelude::*;
+use bevy_tnua::TnuaSensorsSet;
 use rand::seq::IndexedRandom;
 
 use crate::character::controller::controller_plugin;
@@ -9,6 +10,7 @@ use crate::game::GameState;
 /// Registers character control and the health rules.
 pub fn character_plugin(app: &mut App) {
     app.add_plugins(controller_plugin)
+        .add_observer(despawn_sensors_with_soldier)
         .add_systems(FixedUpdate, despawn_on_zero_health.run_if(in_state(GameState::Battle)));
 }
 
@@ -123,6 +125,20 @@ fn despawn_on_zero_health(mut commands: Commands, query: Query<(Entity, &Health)
     }
 }
 
+/// Despawns a soldier's Tnua ground sensor along with the soldier.
+///
+/// Tnua holds the sensor through the `TnuaSensorOf` relationship, not as a
+/// child, and that relationship is not `linked_spawn`, so Bevy leaves the
+/// sensor entity behind when the soldier despawns.
+fn despawn_sensors_with_soldier(removed: On<Remove, Soldier>, sensors: Query<&TnuaSensorsSet>, mut commands: Commands) {
+    let Ok(sensor_set) = sensors.get(removed.entity) else {
+        return;
+    };
+    for sensor in sensor_set.iter() {
+        commands.entity(sensor).try_despawn();
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -154,5 +170,19 @@ mod tests {
     #[test]
     fn random_name_comes_from_the_name_list() {
         assert!(NAMES.contains(&random_name()));
+    }
+
+    #[test]
+    fn the_tnua_sensor_goes_with_the_soldier() {
+        let mut app = App::new();
+        app.add_observer(despawn_sensors_with_soldier);
+
+        let soldier = app.world_mut().spawn(Soldier).id();
+        let sensor = app.world_mut().spawn(bevy_tnua::TnuaSensorOf(soldier)).id();
+
+        app.world_mut().entity_mut(soldier).despawn();
+        app.world_mut().flush();
+
+        assert!(app.world().get_entity(sensor).is_err(), "the sensor entity outlived the soldier");
     }
 }
