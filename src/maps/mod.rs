@@ -15,7 +15,7 @@ pub mod testing_area;
 
 use bevy::prelude::*;
 
-use crate::battle::teams::{SpawnConfig, TeamId, spawn_teams};
+use crate::battle::teams::{SpawnConfig, Team, spawn_teams};
 use crate::game::GameState;
 
 /// One battlefield: its terrain and the teams that start on it.
@@ -117,13 +117,13 @@ impl FormationConfig {
     /// Positions are centred along the Z axis and spaced according to
     /// `z_spacing`. Red team spawns on negative X, Blue on positive X.
     #[must_use]
-    pub fn spawn_positions(&self, team: TeamId) -> Vec<Vec3> {
+    pub fn spawn_positions(&self, team: Team) -> Vec<Vec3> {
         let mut positions = Vec::with_capacity(self.team_size);
 
         // X position: negative for Red, positive for Blue
         let x = match team {
-            TeamId::Red => -self.spawn_x_offset,
-            TeamId::Blue => self.spawn_x_offset,
+            Team::Red => -self.spawn_x_offset,
+            Team::Blue => self.spawn_x_offset,
         };
 
         // Calculate Z offset to center the team formation
@@ -148,13 +148,13 @@ mod tests {
 
     #[test]
     fn spawn_positions_returns_one_position_per_soldier() {
-        assert_eq!(FORMATION.spawn_positions(TeamId::Red).len(), 4);
-        assert_eq!(FORMATION.spawn_positions(TeamId::Blue).len(), 4);
+        assert_eq!(FORMATION.spawn_positions(Team::Red).len(), 4);
+        assert_eq!(FORMATION.spawn_positions(Team::Blue).len(), 4);
     }
 
     #[test]
     fn red_team_spawns_on_negative_x() {
-        for pos in FORMATION.spawn_positions(TeamId::Red) {
+        for pos in FORMATION.spawn_positions(Team::Red) {
             assert_eq!(pos.x, -15.0);
             assert_eq!(pos.y, 3.0);
         }
@@ -162,7 +162,7 @@ mod tests {
 
     #[test]
     fn blue_team_spawns_on_positive_x() {
-        for pos in FORMATION.spawn_positions(TeamId::Blue) {
+        for pos in FORMATION.spawn_positions(Team::Blue) {
             assert_eq!(pos.x, 15.0);
             assert_eq!(pos.y, 3.0);
         }
@@ -171,7 +171,7 @@ mod tests {
     #[test]
     fn spawn_positions_are_centered_on_z() {
         // With 4 characters and 3.0 spacing: -4.5, -1.5, +1.5, +4.5
-        let positions = FORMATION.spawn_positions(TeamId::Red);
+        let positions = FORMATION.spawn_positions(Team::Red);
         let z_values: Vec<f32> = positions.iter().map(|p| p.z).collect();
         assert_eq!(z_values, vec![-4.5, -1.5, 1.5, 4.5]);
     }

@@ -4,7 +4,7 @@ use avian3d::prelude::{Collider, RigidBody};
 use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
 
-use crate::battle::teams::{SpawnConfig, TeamConfig, TeamId};
+use crate::battle::teams::{SpawnConfig, Team, TeamConfig};
 use crate::game::GameState;
 use crate::maps::{FormationConfig, Map, MapSelection, terrain_material};
 
@@ -60,13 +60,13 @@ impl Map for Hills {
         SpawnConfig {
             teams: vec![
                 TeamConfig {
-                    team_id: TeamId::Red,
-                    positions: FORMATION.spawn_positions(TeamId::Red),
+                    team: Team::Red,
+                    positions: FORMATION.spawn_positions(Team::Red),
                     player_controlled: false,
                 },
                 TeamConfig {
-                    team_id: TeamId::Blue,
-                    positions: FORMATION.spawn_positions(TeamId::Blue),
+                    team: Team::Blue,
+                    positions: FORMATION.spawn_positions(Team::Blue),
                     player_controlled: false,
                 },
             ],

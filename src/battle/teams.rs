@@ -6,28 +6,29 @@ use bevy_tnua::builtins::{TnuaBuiltinJumpConfig, TnuaBuiltinWalkConfig};
 use bevy_tnua::prelude::{TnuaConfig, TnuaController};
 use bevy_tnua_avian3d::prelude::TnuaAvian3dSensorShape;
 
-use crate::character::TreeCharacter;
 use crate::character::controller::{
     BODY_HALF_HEIGHT, BODY_RADIUS, ControlScheme, ControlSchemeConfig, FLOAT_HEIGHT, JUMP_HEIGHT, PlayerControlled,
     SENSOR_RADIUS,
 };
+use crate::character::{Soldier, random_name};
 use crate::game::GameState;
 use crate::maps::Map;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum TeamId {
+/// One of the two sides in a battle. Every soldier belongs to exactly one.
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Team {
     /// The red team, spawning on the negative X side of the map.
     Red,
     /// The blue team, spawning on the positive X side of the map.
     Blue,
 }
 
-impl TeamId {
+impl Team {
     #[must_use]
     pub fn color(&self) -> Color {
         match self {
-            TeamId::Red => Color::srgb(0.85, 0.2, 0.2),  // Crimson red
-            TeamId::Blue => Color::srgb(0.2, 0.4, 0.85), // Royal blue
+            Team::Red => Color::srgb(0.85, 0.2, 0.2),  // Crimson red
+            Team::Blue => Color::srgb(0.2, 0.4, 0.85), // Royal blue
         }
     }
 
@@ -35,22 +36,15 @@ impl TeamId {
     #[must_use]
     pub fn name(&self) -> &'static str {
         match self {
-            TeamId::Red => "Red Team",
-            TeamId::Blue => "Blue Team",
+            Team::Red => "Red Team",
+            Team::Blue => "Blue Team",
         }
     }
 }
 
-/// Component that identifies which team an entity belongs to.
-#[derive(Component, Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct Team {
-    /// The team identifier for this entity.
-    pub id: TeamId,
-}
-
 /// Spawn positions and team assignment for a single team.
 pub struct TeamConfig {
-    pub team_id: TeamId,
+    pub team: Team,
     pub positions: Vec<Vec3>,
     /// When true, this team's characters receive the keyboard-driven
     /// [`PlayerControlled`] marker.
@@ -86,19 +80,19 @@ pub fn spawn_teams<M: Map>(
     });
 
     for team in &config.teams {
-        let material = materials.add(StandardMaterial { base_color: team.team_id.color(), ..default() });
+        let material = materials.add(StandardMaterial { base_color: team.team.color(), ..default() });
 
         for &position in &team.positions {
             let mut soldier = commands.spawn((
-                Name::new(format!("{} Soldier", team.team_id.name())),
+                Name::new(format!("{} ({})", random_name(), team.team.name())),
                 Mesh3d(body_mesh.clone()),
                 MeshMaterial3d(material.clone()),
                 Transform::from_translation(position),
                 RigidBody::Dynamic,
                 Collider::capsule(BODY_RADIUS, BODY_HALF_HEIGHT),
                 LockedAxes::ROTATION_LOCKED,
-                TreeCharacter::default(),
-                Team { id: team.team_id },
+                Soldier,
+                team.team,
                 DespawnOnExit(GameState::Battle),
                 (
                     TnuaController::<ControlScheme>::default(),

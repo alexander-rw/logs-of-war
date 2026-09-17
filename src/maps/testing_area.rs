@@ -5,7 +5,7 @@
 use avian3d::prelude::{Collider, RigidBody};
 use bevy::prelude::*;
 
-use crate::battle::teams::{SpawnConfig, TeamConfig, TeamId};
+use crate::battle::teams::{SpawnConfig, Team, TeamConfig};
 use crate::maps::{Map, MapSelection, terrain_material};
 
 /// Total width and depth of the ground slab in world units.
@@ -52,12 +52,12 @@ impl Map for TestingArea {
         SpawnConfig {
             teams: vec![
                 TeamConfig {
-                    team_id: TeamId::Red,
+                    team: Team::Red,
                     positions: vec![Vec3::new(-SPAWN_X_OFFSET, SPAWN_HEIGHT, 0.0)],
                     player_controlled: false,
                 },
                 TeamConfig {
-                    team_id: TeamId::Blue,
+                    team: Team::Blue,
                     positions: vec![Vec3::new(SPAWN_X_OFFSET, SPAWN_HEIGHT, 0.0)],
                     player_controlled: true,
                 },
