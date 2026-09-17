@@ -2,7 +2,40 @@ use bevy::prelude::*;
 
 use crate::game::GameState;
 use crate::maps::MapSelection;
-use crate::ui::DEFAULT_TEXT_COLOR;
+use crate::ui::{ButtonColors, DEFAULT_TEXT_COLOR, button, button_node, button_text, fullscreen_root};
+
+/// Background of the briefing screen.
+const SCREEN_BACKGROUND: Color = Color::srgb(0.08, 0.08, 0.10);
+
+/// Text colour of a caption above a control.
+const CAPTION_COLOR: Color = Color::srgba(1.0, 1.0, 1.0, 0.6);
+
+/// Width shared by the dropdown, its options, and the Begin button.
+const CONTROL_WIDTH: Val = Val::Px(240.0);
+
+/// Colours of the dropdown trigger and its options.
+const DROPDOWN_COLORS: ButtonColors = ButtonColors {
+    normal: Color::srgb(0.18, 0.18, 0.22),
+    hovered: Color::srgb(0.24, 0.24, 0.30),
+    pressed: Color::srgb(0.30, 0.30, 0.38),
+    hovered_selected: Color::srgb(0.30, 0.30, 0.38),
+};
+
+/// Colours of one option in the open dropdown list.
+const OPTION_COLORS: ButtonColors = ButtonColors {
+    normal: Color::srgb(0.13, 0.13, 0.16),
+    hovered: Color::srgb(0.20, 0.20, 0.25),
+    pressed: Color::srgb(0.26, 0.26, 0.32),
+    hovered_selected: Color::srgb(0.26, 0.26, 0.32),
+};
+
+/// Colours of the green Begin button.
+const BEGIN_COLORS: ButtonColors = ButtonColors {
+    normal: Color::srgb(0.20, 0.45, 0.20),
+    hovered: Color::srgb(0.26, 0.55, 0.26),
+    pressed: Color::srgb(0.32, 0.65, 0.32),
+    hovered_selected: Color::srgb(0.32, 0.65, 0.32),
+};
 
 pub fn briefing_plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Briefing), briefing_setup).add_systems(
@@ -39,16 +72,8 @@ fn briefing_setup(mut commands: Commands, map_selection: Res<MapSelection>) {
     commands
         .spawn((
             DespawnOnExit(GameState::Briefing),
-            Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                row_gap: Val::Px(24.0),
-                ..default()
-            },
-            BackgroundColor(Color::srgb(0.08, 0.08, 0.10)),
+            Node { flex_direction: FlexDirection::Column, row_gap: px(24), ..fullscreen_root() },
+            BackgroundColor(SCREEN_BACKGROUND),
         ))
         .with_children(|root| {
             // Title
@@ -62,7 +87,7 @@ fn briefing_setup(mut commands: Commands, map_selection: Res<MapSelection>) {
             root.spawn(Node {
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Stretch,
-                width: Val::Px(240.0),
+                width: CONTROL_WIDTH,
                 ..default()
             })
             .with_children(|container| {
@@ -70,37 +95,28 @@ fn briefing_setup(mut commands: Commands, map_selection: Res<MapSelection>) {
                 container.spawn((
                     Text::new("Map Selection"),
                     TextFont { font_size: 14.0, ..default() },
-                    TextColor(Color::srgba(1.0, 1.0, 1.0, 0.6)),
+                    TextColor(CAPTION_COLOR),
                 ));
 
-                // Dropdown trigger button — initial label comes from the enum
+                // Dropdown trigger button — the label shows the current selection
                 container
                     .spawn((
-                        Button,
+                        button(
+                            Node {
+                                justify_content: JustifyContent::SpaceBetween,
+                                padding: UiRect::horizontal(px(12)),
+                                ..button_node(CONTROL_WIDTH, px(50))
+                            },
+                            DROPDOWN_COLORS,
+                        ),
                         DropdownButton,
-                        Node {
-                            width: Val::Px(240.0),
-                            height: Val::Px(50.0),
-                            justify_content: JustifyContent::SpaceBetween,
-                            align_items: AlignItems::Center,
-                            padding: UiRect::horizontal(Val::Px(12.0)),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb(0.18, 0.18, 0.22)),
                     ))
                     .with_children(|btn| {
-                        btn.spawn((
-                            // `label()` gives us "Hills", "Testing Area", etc. — not the
-                            // raw `Debug` format which would show "TestingArea".
-                            Text::new(selected_label),
-                            TextFont { font_size: 24.0, ..default() },
-                            TextColor(DEFAULT_TEXT_COLOR),
-                            DropdownLabel,
-                        ));
+                        btn.spawn((button_text(selected_label, 24.0), DropdownLabel));
                         btn.spawn((
                             Text::new("v"),
                             TextFont { font_size: 18.0, ..default() },
-                            TextColor(Color::srgba(1.0, 1.0, 1.0, 0.6)),
+                            TextColor(CAPTION_COLOR),
                         ));
                     });
 
@@ -109,8 +125,8 @@ fn briefing_setup(mut commands: Commands, map_selection: Res<MapSelection>) {
                     .spawn((
                         DropdownList,
                         Visibility::Hidden,
-                        Node { flex_direction: FlexDirection::Column, width: Val::Px(240.0), ..default() },
-                        BackgroundColor(Color::srgb(0.13, 0.13, 0.16)),
+                        Node { flex_direction: FlexDirection::Column, width: CONTROL_WIDTH, ..default() },
+                        BackgroundColor(OPTION_COLORS.normal),
                     ))
                     .with_children(|list| {
                         // `all_variants()` returns a `&'static [MapSelection]` — a
@@ -118,47 +134,26 @@ fn briefing_setup(mut commands: Commands, map_selection: Res<MapSelection>) {
                         // In debug builds this includes TestingArea; release builds omit it.
                         for &variant in MapSelection::all_variants() {
                             list.spawn((
-                                Button,
+                                button(
+                                    Node {
+                                        justify_content: JustifyContent::FlexStart,
+                                        padding: UiRect::horizontal(px(12)),
+                                        ..button_node(percent(100), px(44))
+                                    },
+                                    OPTION_COLORS,
+                                ),
                                 DropdownOption(variant),
-                                Node {
-                                    width: Val::Percent(100.0),
-                                    height: Val::Px(44.0),
-                                    align_items: AlignItems::Center,
-                                    padding: UiRect::horizontal(Val::Px(12.0)),
-                                    ..default()
-                                },
-                                BackgroundColor(Color::srgb(0.13, 0.13, 0.16)),
                             ))
                             .with_children(|option| {
-                                option.spawn((
-                                    Text::new(variant.label()),
-                                    TextFont { font_size: 22.0, ..default() },
-                                    TextColor(DEFAULT_TEXT_COLOR),
-                                ));
+                                option.spawn(button_text(variant.label(), 22.0));
                             });
                         }
                     });
             });
 
             // Begin button
-            root.spawn((
-                Button,
-                StartButton,
-                Node {
-                    width: Val::Px(240.0),
-                    height: Val::Px(60.0),
-                    justify_content: JustifyContent::Center,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                BackgroundColor(Color::srgb(0.20, 0.45, 0.20)),
-            ))
-            .with_children(|btn| {
-                btn.spawn((
-                    Text::new("Begin"),
-                    TextFont { font_size: 32.0, ..default() },
-                    TextColor(DEFAULT_TEXT_COLOR),
-                ));
+            root.spawn((button(button_node(CONTROL_WIDTH, px(60)), BEGIN_COLORS), StartButton)).with_children(|btn| {
+                btn.spawn(button_text("Begin", 32.0));
             });
         });
 }

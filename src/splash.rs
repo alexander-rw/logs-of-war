@@ -5,6 +5,7 @@ use bevy::prelude::*;
 struct SplashTimer(Timer);
 
 use crate::game::GameState;
+use crate::ui::fullscreen_root;
 
 // This plugin will display a splash screen with Bevy logo for 2 seconds before switching to the menu
 pub fn splash_plugin(app: &mut App) {
@@ -22,13 +23,7 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         // This entity will be despawned when exiting the state
         DespawnOnExit(GameState::Splash),
-        Node {
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            width: percent(100),
-            height: percent(100),
-            ..default()
-        },
+        fullscreen_root(),
         children![(
             ImageNode::new(icon),
             Node {

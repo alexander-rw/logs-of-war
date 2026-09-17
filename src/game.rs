@@ -9,6 +9,7 @@ use crate::maps::maps_plugin;
 use crate::menu::menu_plugin;
 use crate::physics::physics_plugin;
 use crate::splash::splash_plugin;
+use crate::ui::ui_plugin;
 
 /// Enum that will be used as a global state for the game
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -33,6 +34,7 @@ pub fn game_plugin(app: &mut App) {
         }),
         PhysicsPlugins::default(),
         camera_plugin,
+        ui_plugin,
         splash_plugin,
         menu_plugin,
         briefing_plugin,

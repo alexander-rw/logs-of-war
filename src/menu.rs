@@ -6,7 +6,7 @@ use bevy::{
 };
 
 use crate::game::GameState;
-use crate::ui::DEFAULT_TEXT_COLOR;
+use crate::ui::{ButtonColors, DEFAULT_TEXT_COLOR, SelectedOption, button, button_node, button_text, fullscreen_root};
 
 /// One of the two settings that can be set through the menu. It is a resource in the app.
 #[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
@@ -40,12 +40,12 @@ pub fn menu_plugin(app: &mut App) {
             Update,
             (setting_button::<DisplayQuality>.run_if(in_state(MenuState::SettingsDisplay)),),
         )
-        // Common systems to all screens that handles buttons behavior
-        .add_systems(
-            Update,
-            (menu_action, button_system).run_if(in_state(GameState::Menu)),
-        );
+        // Common system to all screens that handles button actions
+        .add_systems(Update, menu_action.run_if(in_state(GameState::Menu)));
 }
+
+/// Font size of every menu button label.
+const BUTTON_FONT_SIZE: f32 = 33.0;
 
 // State used for the current menu screen
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -67,15 +67,6 @@ struct OnSettingsMenuScreen;
 #[derive(Component)]
 struct OnDisplaySettingsMenuScreen;
 
-const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
-const HOVERED_PRESSED_BUTTON: Color = Color::srgb(0.25, 0.65, 0.25);
-const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
-
-// Tag component used to mark which setting is currently selected
-#[derive(Component)]
-struct SelectedOption;
-
 // All actions that can be triggered from a button click
 #[derive(Component)]
 #[allow(dead_code)]
@@ -87,24 +78,6 @@ enum MenuButtonAction {
     BackToMainMenu,
     BackToSettings,
     Quit,
-}
-
-// This system handles changing all buttons color based on mouse interaction
-#[allow(clippy::type_complexity)]
-fn button_system(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, Option<&SelectedOption>),
-        (Changed<Interaction>, With<Button>),
-    >,
-) {
-    for (interaction, mut background_color, selected) in &mut interaction_query {
-        *background_color = match (*interaction, selected) {
-            (Interaction::Pressed, _) | (Interaction::None, Some(_)) => PRESSED_BUTTON.into(),
-            (Interaction::Hovered, Some(_)) => HOVERED_PRESSED_BUTTON.into(),
-            (Interaction::Hovered, None) => HOVERED_BUTTON.into(),
-            (Interaction::None, None) => NORMAL_BUTTON.into(),
-        }
-    }
 }
 
 // This system updates the settings when a new value for a setting is selected, and marks
@@ -119,7 +92,7 @@ fn setting_button<T: Resource + Component + PartialEq + Copy>(
     let (previous_button, mut previous_button_color) = selected_query.into_inner();
     for (interaction, button_setting, entity) in &interaction_query {
         if *interaction == Interaction::Pressed && *setting != *button_setting {
-            *previous_button_color = NORMAL_BUTTON.into();
+            *previous_button_color = ButtonColors::MENU.normal.into();
             commands.entity(previous_button).remove::<SelectedOption>();
             commands.entity(entity).insert(SelectedOption);
             *setting = *button_setting;
@@ -133,14 +106,7 @@ fn menu_setup(mut menu_state: ResMut<NextState<MenuState>>) {
 
 fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Common style for all buttons on the screen
-    let button_node = Node {
-        width: px(300),
-        height: px(65),
-        margin: UiRect::all(px(20)),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
-    };
+    let button_node = Node { margin: UiRect::all(px(20)), ..button_node(px(300), px(65)) };
     let button_icon_node = Node {
         width: px(30),
         // This takes the icons out of the flexbox flow, to be positioned exactly
@@ -149,7 +115,6 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         left: px(10),
         ..default()
     };
-    let button_text_font = TextFont { font_size: 33.0, ..default() };
 
     let right_icon = asset_server.load("textures/right.png");
     let wrench_icon = asset_server.load("textures/wrench.png");
@@ -157,13 +122,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
         DespawnOnExit(MenuState::Main),
-        Node {
-            width: percent(100),
-            height: percent(100),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        },
+        fullscreen_root(),
         children![(
             Node { flex_direction: FlexDirection::Column, align_items: AlignItems::Center, ..default() },
             BackgroundColor(BURLYWOOD.into()),
@@ -180,34 +139,25 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 // - settings
                 // - quit
                 (
-                    Button,
-                    button_node.clone(),
-                    BackgroundColor(NORMAL_BUTTON),
+                    button(button_node.clone(), ButtonColors::MENU),
                     MenuButtonAction::Play,
                     children![
                         (ImageNode::new(right_icon), button_icon_node.clone()),
-                        (Text::new("New Game"), button_text_font.clone(), TextColor(DEFAULT_TEXT_COLOR),),
+                        button_text("New Game", BUTTON_FONT_SIZE),
                     ]
                 ),
                 (
-                    Button,
-                    button_node.clone(),
-                    BackgroundColor(NORMAL_BUTTON),
+                    button(button_node.clone(), ButtonColors::MENU),
                     MenuButtonAction::Settings,
                     children![
                         (ImageNode::new(wrench_icon), button_icon_node.clone()),
-                        (Text::new("Settings"), button_text_font.clone(), TextColor(DEFAULT_TEXT_COLOR),),
+                        button_text("Settings", BUTTON_FONT_SIZE),
                     ]
                 ),
                 (
-                    Button,
-                    button_node,
-                    BackgroundColor(NORMAL_BUTTON),
+                    button(button_node, ButtonColors::MENU),
                     MenuButtonAction::Quit,
-                    children![
-                        (ImageNode::new(exit_icon), button_icon_node),
-                        (Text::new("Quit"), button_text_font, TextColor(DEFAULT_TEXT_COLOR),),
-                    ]
+                    children![(ImageNode::new(exit_icon), button_icon_node), button_text("Quit", BUTTON_FONT_SIZE),]
                 ),
             ]
         )],
@@ -215,26 +165,11 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn settings_menu_setup(mut commands: Commands) {
-    let button_node = Node {
-        width: px(200),
-        height: px(65),
-        margin: UiRect::all(px(20)),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
-    };
-
-    let button_text_style = (TextFont { font_size: 33.0, ..default() }, TextColor(DEFAULT_TEXT_COLOR));
+    let button_node = Node { margin: UiRect::all(px(20)), ..button_node(px(200), px(65)) };
 
     commands.spawn((
         DespawnOnExit(MenuState::Settings),
-        Node {
-            width: percent(100),
-            height: percent(100),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        },
+        fullscreen_root(),
         OnSettingsMenuScreen,
         children![(
             Node { flex_direction: FlexDirection::Column, align_items: AlignItems::Center, ..default() },
@@ -248,11 +183,9 @@ fn settings_menu_setup(mut commands: Commands) {
                 .into_iter()
                 .map(move |(action, text)| {
                     (
-                        Button,
-                        button_node.clone(),
-                        BackgroundColor(NORMAL_BUTTON),
+                        button(button_node.clone(), ButtonColors::MENU),
                         action,
-                        children![(Text::new(text), button_text_style.clone())],
+                        children![button_text(text, BUTTON_FONT_SIZE)],
                     )
                 })
             ))
@@ -261,51 +194,32 @@ fn settings_menu_setup(mut commands: Commands) {
 }
 
 fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<DisplayQuality>) {
-    fn button_node() -> Node {
-        Node {
-            width: px(200),
-            height: px(65),
-            margin: UiRect::all(px(20)),
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            ..default()
-        }
-    }
-    fn button_text_style() -> impl Bundle {
-        (TextFont { font_size: 33.0, ..default() }, TextColor(DEFAULT_TEXT_COLOR))
+    fn settings_button_node() -> Node {
+        Node { margin: UiRect::all(px(20)), ..button_node(px(200), px(65)) }
     }
 
     let display_quality = *display_quality;
     commands.spawn((
         DespawnOnExit(MenuState::SettingsDisplay),
-        Node {
-            width: percent(100),
-            height: percent(100),
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            ..default()
-        },
+        fullscreen_root(),
         OnDisplaySettingsMenuScreen,
         children![(
             Node { flex_direction: FlexDirection::Column, align_items: AlignItems::Center, ..default() },
             BackgroundColor(CRIMSON.into()),
             children![
-                // Create a new `Node`, this time not setting its `flex_direction`. It will
-                // use the default value, `FlexDirection::Row`, from left to right.
+                // A row, from left to right: the setting's label and its values.
                 (
                     Node { align_items: AlignItems::Center, ..default() },
                     BackgroundColor(CRIMSON.into()),
                     Children::spawn((
                         // Display a label for the current setting
-                        Spawn((Text::new("Display Quality"), button_text_style())),
+                        Spawn(button_text("Display Quality", BUTTON_FONT_SIZE)),
                         SpawnWith(move |parent: &mut ChildSpawner| {
                             let quality_setting = DisplayQuality::High;
                             let mut entity = parent.spawn((
-                                Button,
-                                Node { width: px(150), height: px(65), ..button_node() },
-                                BackgroundColor(NORMAL_BUTTON),
+                                button(Node { width: px(150), ..settings_button_node() }, ButtonColors::MENU),
                                 quality_setting,
-                                children![(Text::new(format!("{quality_setting:?}")), button_text_style(),)],
+                                children![button_text(format!("{quality_setting:?}"), BUTTON_FONT_SIZE)],
                             ));
                             if display_quality == quality_setting {
                                 entity.insert(SelectedOption);
@@ -315,11 +229,9 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
                 ),
                 // Display the back button to return to the settings screen
                 (
-                    Button,
-                    button_node(),
-                    BackgroundColor(NORMAL_BUTTON),
+                    button(settings_button_node(), ButtonColors::MENU),
                     MenuButtonAction::BackToSettings,
-                    children![(Text::new("Back"), button_text_style())]
+                    children![button_text("Back", BUTTON_FONT_SIZE)]
                 )
             ]
         )],
