@@ -1,9 +1,5 @@
 use bevy::prelude::*;
 
-// Tag component used to tag entities added on the splash screen
-#[derive(Component)]
-struct OnSplashScreen;
-
 // Newtype to use a `Timer` for this screen as a resource
 #[derive(Resource, Deref, DerefMut)]
 struct SplashTimer(Timer);
@@ -33,7 +29,6 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             height: percent(100),
             ..default()
         },
-        OnSplashScreen,
         children![(
             ImageNode::new(icon),
             Node {

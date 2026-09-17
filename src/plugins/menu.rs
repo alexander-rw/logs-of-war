@@ -51,10 +51,6 @@ enum MenuState {
     Disabled,
 }
 
-// Tag component used to tag entities added on the main menu screen
-#[derive(Component)]
-struct OnMainMenuScreen;
-
 // Tag component used to tag entities added on the settings menu screen
 #[derive(Component)]
 struct OnSettingsMenuScreen;
@@ -160,7 +156,6 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             justify_content: JustifyContent::Center,
             ..default()
         },
-        OnMainMenuScreen,
         children![(
             Node { flex_direction: FlexDirection::Column, align_items: AlignItems::Center, ..default() },
             BackgroundColor(BURLYWOOD.into()),

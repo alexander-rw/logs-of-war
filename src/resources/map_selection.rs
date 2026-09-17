@@ -42,8 +42,7 @@ impl MapSelection {
     ///
     /// Debug builds include [`MapSelection::TestingArea`]; release builds do not.
     ///
-    /// This is the Rust equivalent of C#'s `Enum.GetValues<T>()`. The slice
-    /// is a compile-time constant — no heap allocation occurs.
+    /// The slice is a compile-time constant — no heap allocation occurs.
     ///
     /// # Examples
     ///
@@ -53,8 +52,6 @@ impl MapSelection {
     /// }
     /// ```
     pub fn all_variants() -> &'static [Self] {
-        // `#[cfg(...)]` on array elements is valid Rust — the compiler includes
-        // or excludes that element at compile time, like C#'s `#if DEBUG`.
         #[cfg(debug_assertions)]
         return &[Self::Hills, Self::TestingArea];
         #[cfg(not(debug_assertions))]

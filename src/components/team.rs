@@ -37,10 +37,6 @@ impl TeamId {
     /// assert_eq!(TeamId::Red.name(), "Red Team");
     /// assert_eq!(TeamId::Blue.name(), "Blue Team");
     /// ```
-    // Note for Python developers: `&'static str` is a string slice with a
-    // 'static lifetime, meaning it lives for the entire program duration.
-    // This is efficient because we're returning references to string literals
-    // embedded in the binary, avoiding heap allocation.
     #[must_use]
     pub fn name(&self) -> &'static str {
         match self {

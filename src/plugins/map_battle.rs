@@ -86,8 +86,6 @@ fn spawn_terrain_for_selection(
 
 /// Sets up game lighting and timer.
 fn map_battle_setup(mut commands: Commands) {
-    info_once!("Setting up Logs of War game state");
-
     commands.spawn((
         DespawnOnExit(GameState::Game),
         PointLight { shadows_enabled: true, ..default() },

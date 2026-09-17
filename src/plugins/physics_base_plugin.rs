@@ -12,8 +12,6 @@ impl Plugin for PhysicsBasePlugin {
                 step.run_if(physics_paused.and(input_just_pressed(KeyCode::Enter))),
             ),
         );
-        // .add_systems(FixedUpdate, ());
-
         self.finish(app);
     }
 
@@ -43,7 +41,6 @@ fn physics_paused(time: Res<Time<Physics>>) -> bool {
 }
 
 fn toggle_paused(mut time: ResMut<Time<Physics>>) {
-    info_once!("toggle_paused ran");
     if time.is_paused() {
         time.unpause();
     } else {

@@ -19,9 +19,6 @@ use crate::components::team::TeamId;
 /// let red_spawns = config.spawn_positions(TeamId::Red);
 /// let blue_spawns = config.spawn_positions(TeamId::Blue);
 /// ```
-// Note for Python developers: `#[derive(Resource)]` makes this struct
-// usable as a Bevy ECS resource, which is like a singleton that systems
-// can access via `Res<TerrainConfig>` or `ResMut<TerrainConfig>`.
 #[derive(Resource, Clone, Debug)]
 pub struct TerrainConfig {
     /// Total width and depth of the terrain in world units.
@@ -85,9 +82,6 @@ impl TerrainConfig {
     /// let positions = config.spawn_positions(TeamId::Red);
     /// // Returns 4 positions at X = -15
     /// ```
-    // Note for Python developers: `Vec<Vec3>` is like `list[tuple[float, float, float]]`.
-    // We allocate with `with_capacity` since we know the exact size, avoiding
-    // reallocations as we push elements.
     #[must_use]
     pub fn spawn_positions(&self, team: TeamId) -> Vec<Vec3> {
         let mut positions = Vec::with_capacity(self.team_size);

@@ -36,10 +36,8 @@ pub fn generate_heightmap_mesh(size: f32, subdivisions: u32, height_scale: f32) 
     // Plane3d creates a plane facing upward (Y-up) by default.
     let mut mesh = Plane3d::default().mesh().size(size, size).subdivisions(subdivisions).build();
 
-    // Modify vertex Y positions to create hills.
-    // `if let Some(...)` safely unwraps an Option — like a null check in C# but
-    // combined with a type cast. If the attribute exists and matches Float32x3,
-    // we get mutable access to the positions array.
+    // Modify vertex Y positions to create hills. The attribute is only
+    // present, and only Float32x3, on a mesh built by `Plane3d`.
     if let Some(VertexAttributeValues::Float32x3(positions)) = mesh.attribute_mut(Mesh::ATTRIBUTE_POSITION) {
         for pos in positions.iter_mut() {
             // Combine two sine waves at different frequencies for natural-looking hills.
@@ -71,10 +69,6 @@ pub fn generate_heightmap_mesh(size: f32, subdivisions: u32, height_scale: f32) 
 ///
 /// If the trimesh collider cannot be built from the mesh, an error is logged
 /// and the terrain is spawned without a physics collider.
-// Note for C# developers: Bevy "systems" are plain functions whose parameters
-// are automatically injected by the ECS at runtime based on their types.
-// `Commands` spawns entities, `ResMut<Assets<T>>` gives mutable access to
-// asset storage, and `Res<T>` gives read-only access to a singleton resource.
 pub fn spawn_terrain(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

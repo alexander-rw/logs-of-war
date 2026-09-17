@@ -19,6 +19,11 @@ impl Plugin for CharacterControllerPlugin {
     }
 }
 
+/// Walk direction contributed by each movement key. Bevy is Z-forward-negative,
+/// so W subtracts Z and S adds it.
+const MOVEMENT_KEYS: [(KeyCode, Vec3); 4] =
+    [(KeyCode::KeyW, Vec3::NEG_Z), (KeyCode::KeyS, Vec3::Z), (KeyCode::KeyA, Vec3::NEG_X), (KeyCode::KeyD, Vec3::X)];
+
 /// Translates WASD movement and Space jumps into Tnua controller commands for
 /// the [`PlayerControlled`] character.
 fn apply_controls(
@@ -30,19 +35,8 @@ fn apply_controls(
     };
     controller.initiate_action_feeding();
 
-    let mut direction = Vec3::ZERO;
-    if keyboard.pressed(KeyCode::KeyW) {
-        direction -= Vec3::Z;
-    }
-    if keyboard.pressed(KeyCode::KeyS) {
-        direction += Vec3::Z;
-    }
-    if keyboard.pressed(KeyCode::KeyA) {
-        direction -= Vec3::X;
-    }
-    if keyboard.pressed(KeyCode::KeyD) {
-        direction += Vec3::X;
-    }
+    let direction: Vec3 =
+        MOVEMENT_KEYS.iter().filter(|(key, _)| keyboard.pressed(*key)).map(|(_, direction)| *direction).sum();
 
     controller.basis = TnuaBuiltinWalk { desired_motion: direction.normalize_or_zero() * WALK_SPEED, ..default() };
 

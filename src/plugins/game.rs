@@ -38,7 +38,6 @@ impl Plugin for GamePlugin {
 
 /// Spawns the single game camera.
 fn setup_camera(mut commands: Commands) {
-    info_once!("Setup system initialized.");
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(-8.5, 14.5, 19.0).looking_at(Vec3::ZERO, Vec3::Y),

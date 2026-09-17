@@ -35,10 +35,8 @@ struct DropdownLabel;
 fn map_setting_setup(mut commands: Commands) {
     commands.insert_resource(MapSelection::default());
 
-    // Note for C# developers: `.with_children()` is the Bevy builder pattern for
-    // attaching child entities. We use it here (instead of the `children![]` macro)
-    // because we need to loop over `MapSelection::all_variants()` to build the
-    // dropdown list dynamically.
+    // `.with_children()` rather than the `children![]` macro, because the
+    // dropdown list is built by looping over `MapSelection::all_variants()`.
     commands
         .spawn((
             DespawnOnExit(GameState::PreGame),
@@ -169,8 +167,6 @@ fn map_setting_setup(mut commands: Commands) {
 // --- Systems ---
 
 /// Query filter type alias to avoid clippy `type_complexity` lint.
-// Note for C# developers: Bevy query types can get verbose. A `type` alias is
-// Rust's equivalent of a C# `using` type alias — purely a compile-time rename.
 type DropdownOptionQuery<'w, 's> =
     Query<'w, 's, (&'static Interaction, &'static DropdownOption), (Changed<Interaction>, With<Button>)>;
 
