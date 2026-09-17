@@ -5,7 +5,7 @@ use bevy::{
     prelude::*,
 };
 
-use crate::game::{GameState, GameStateEvent};
+use crate::game::GameState;
 use crate::ui::DEFAULT_TEXT_COLOR;
 
 /// One of the two settings that can be set through the menu. It is a resource in the app.
@@ -330,7 +330,7 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
 fn menu_action(
     interaction_query: Query<(&Interaction, &MenuButtonAction), (Changed<Interaction>, With<Button>)>,
     mut app_exit_writer: MessageWriter<AppExit>,
-    mut game_state_writer: MessageWriter<GameStateEvent>,
+    mut game_state: ResMut<NextState<GameState>>,
     mut menu_state: ResMut<NextState<MenuState>>,
 ) {
     for (interaction, menu_button_action) in &interaction_query {
@@ -340,7 +340,7 @@ fn menu_action(
                     app_exit_writer.write(AppExit::Success);
                 }
                 MenuButtonAction::Play => {
-                    game_state_writer.write(GameStateEvent::PlayRequested);
+                    game_state.set(GameState::Briefing);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Settings => menu_state.set(MenuState::Settings),

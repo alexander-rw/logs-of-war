@@ -5,7 +5,6 @@ use crate::battle::battle_plugin;
 use crate::briefing::briefing_plugin;
 use crate::camera::camera_plugin;
 use crate::character::controller::character_plugin;
-use crate::maps::MapSelection;
 use crate::menu::menu_plugin;
 use crate::physics::physics_plugin;
 use crate::splash::splash_plugin;
@@ -20,14 +19,6 @@ pub enum GameState {
     Battle,
 }
 
-#[derive(Message)]
-pub enum GameStateEvent {
-    SplashComplete,
-    PlayRequested,
-    MapSelected(MapSelection),
-    GameComplete,
-}
-
 /// Single registration point for the game.
 ///
 /// `main` adds only this plugin; everything else (windowing, physics, game
@@ -40,7 +31,6 @@ pub fn game_plugin(app: &mut App) {
             ..default()
         }),
         PhysicsPlugins::default(),
-        game_flow_plugin,
         camera_plugin,
         splash_plugin,
         menu_plugin,
@@ -50,33 +40,4 @@ pub fn game_plugin(app: &mut App) {
         character_plugin,
     ))
     .init_state::<GameState>();
-}
-
-fn game_flow_plugin(app: &mut App) {
-    app.add_message::<GameStateEvent>().add_systems(Update, handle_game_flow_events);
-}
-
-fn handle_game_flow_events(
-    mut events: MessageReader<GameStateEvent>,
-    mut game_state: ResMut<NextState<GameState>>,
-    mut map_selection: ResMut<MapSelection>,
-) {
-    for event in events.read() {
-        match event {
-            GameStateEvent::SplashComplete => {
-                game_state.set(GameState::Menu);
-            }
-            GameStateEvent::PlayRequested => {
-                game_state.set(GameState::Briefing);
-            }
-            GameStateEvent::MapSelected(map) => {
-                *map_selection = *map;
-                info!("Building map: {:?}", map);
-                game_state.set(GameState::Battle);
-            }
-            GameStateEvent::GameComplete => {
-                game_state.set(GameState::Menu);
-            }
-        }
-    }
 }

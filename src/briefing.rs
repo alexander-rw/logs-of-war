@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::game::{GameState, GameStateEvent};
+use crate::game::GameState;
 use crate::maps::MapSelection;
 use crate::ui::DEFAULT_TEXT_COLOR;
 
@@ -209,12 +209,11 @@ fn dropdown_option_system(
 
 fn start_game_button_system(
     interaction_query: Query<&Interaction, (Changed<Interaction>, With<StartButton>)>,
-    map_selection: Res<MapSelection>,
-    mut game_state_writer: MessageWriter<GameStateEvent>,
+    mut game_state: ResMut<NextState<GameState>>,
 ) {
     for interaction in &interaction_query {
         if *interaction == Interaction::Pressed {
-            game_state_writer.write(GameStateEvent::MapSelected(*map_selection));
+            game_state.set(GameState::Battle);
         }
     }
 }

@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use crate::battle::teams::spawn_teams;
 use crate::character::despawn_on_zero_health;
-use crate::game::{GameState, GameStateEvent};
+use crate::game::GameState;
 use crate::maps::{MapSelection, TerrainConfig};
 
 #[derive(Resource, Deref, DerefMut)]
@@ -40,6 +40,7 @@ fn spawn_terrain_for_selection(
     materials: ResMut<Assets<StandardMaterial>>,
     config: Res<TerrainConfig>,
 ) {
+    info!("Building map: {:?}", *selection);
     selection.generate(commands, meshes, materials, config);
 }
 
@@ -56,8 +57,8 @@ fn map_battle_setup(mut commands: Commands) {
     commands.insert_resource(GameTimer(Timer::from_seconds(3.0, TimerMode::Once)));
 }
 
-fn countdown(mut game_state_writer: MessageWriter<GameStateEvent>, mut timer: ResMut<GameTimer>, time: Res<Time>) {
+fn countdown(mut game_state: ResMut<NextState<GameState>>, mut timer: ResMut<GameTimer>, time: Res<Time>) {
     if timer.tick(time.delta()).just_finished() {
-        game_state_writer.write(GameStateEvent::GameComplete);
+        game_state.set(GameState::Menu);
     }
 }
