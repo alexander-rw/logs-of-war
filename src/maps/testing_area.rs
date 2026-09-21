@@ -6,6 +6,7 @@ use avian3d::prelude::{Collider, RigidBody};
 use bevy::prelude::*;
 
 use crate::battle::teams::{SpawnConfig, Team, TeamConfig};
+use crate::game::GameState;
 use crate::maps::{Map, MapSelection, terrain_material};
 
 /// Total width and depth of the ground slab in world units.
@@ -43,6 +44,7 @@ impl Map for TestingArea {
             Transform::from_translation(Vec3::new(0.0, -THICKNESS / 2.0, 0.0)),
             RigidBody::Static,
             Collider::cuboid(SIZE, THICKNESS, SIZE),
+            DespawnOnExit(GameState::Battle),
         ));
     }
 
