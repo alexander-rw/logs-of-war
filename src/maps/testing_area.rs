@@ -15,7 +15,7 @@ const SIZE: f32 = 40.0;
 /// Thickness of the ground slab in world units.
 const THICKNESS: f32 = 0.5;
 
-/// Y position (height) where characters spawn, above the ground so that
+/// Y position (height) where soldiers spawn, above the ground so that
 /// physics drops them onto the surface.
 const SPAWN_HEIGHT: f32 = 3.0;
 

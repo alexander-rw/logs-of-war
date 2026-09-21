@@ -1,4 +1,4 @@
-//! Character control scheme and player marker for Tnua-driven movement.
+//! Soldier control scheme and player marker for Tnua-driven movement.
 
 use bevy::prelude::*;
 use bevy_tnua::builtins::{TnuaBuiltinJump, TnuaBuiltinWalk};
@@ -17,7 +17,7 @@ pub const BODY_HALF_HEIGHT: f32 = 0.6;
 /// Height of the hover gap between the bottom of the collider and the ground.
 const FLOAT_GAP: f32 = 0.4;
 
-/// Distance the character origin floats above the ground.
+/// Distance the soldier origin floats above the ground.
 ///
 /// The capsule half-extent (half its segment length plus its radius) plus the
 /// hover gap, so the body rests just above the surface.
@@ -46,12 +46,12 @@ pub enum ControlScheme {
     Jump(TnuaBuiltinJump),
 }
 
-/// Marks the single character that responds to keyboard input.
+/// Marks the single soldier that responds to keyboard input.
 #[derive(Component)]
 pub struct PlayerControlled;
 
 /// Registers the Tnua controller and Avian backend, and drives the
-/// player-controlled character from the keyboard.
+/// player-controlled soldier from the keyboard.
 ///
 /// Both Tnua plugins run in `FixedUpdate` to match Avian's fixed-timestep
 /// simulation.
@@ -66,7 +66,7 @@ const MOVEMENT_KEYS: [(KeyCode, Vec3); 4] =
     [(KeyCode::KeyW, Vec3::NEG_Z), (KeyCode::KeyS, Vec3::Z), (KeyCode::KeyA, Vec3::NEG_X), (KeyCode::KeyD, Vec3::X)];
 
 /// Translates WASD movement and Space jumps into Tnua controller commands for
-/// the [`PlayerControlled`] character.
+/// the [`PlayerControlled`] soldier.
 fn apply_controls(
     keyboard: Res<ButtonInput<KeyCode>>,
     mut query: Query<&mut TnuaController<ControlScheme>, With<PlayerControlled>>,

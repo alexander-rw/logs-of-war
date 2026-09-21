@@ -100,19 +100,19 @@ pub struct FormationConfig {
     /// Red spawns at -spawn_x_offset, Blue at +spawn_x_offset.
     pub spawn_x_offset: f32,
 
-    /// Y position (height) where characters spawn.
+    /// Y position (height) where soldiers spawn.
     /// Should be above terrain to allow physics to drop them onto surface.
     pub spawn_height: f32,
 
-    /// Number of characters per team.
+    /// Number of soldiers per team.
     pub team_size: usize,
 
-    /// Spacing between characters along the Z axis.
+    /// Spacing between soldiers along the Z axis.
     pub z_spacing: f32,
 }
 
 impl FormationConfig {
-    /// Returns spawn positions for all characters on a team.
+    /// Returns spawn positions for all soldiers on a team.
     ///
     /// Positions are centred along the Z axis and spaced according to
     /// `z_spacing`. Red team spawns on negative X, Blue on positive X.
@@ -127,7 +127,7 @@ impl FormationConfig {
         };
 
         // Calculate Z offset to center the team formation
-        // For 4 characters with 3.0 spacing: z_start = -4.5
+        // For 4 soldiers with 3.0 spacing: z_start = -4.5
         let z_start = -((self.team_size as f32 - 1.0) * self.z_spacing) / 2.0;
 
         for i in 0..self.team_size {
@@ -170,7 +170,7 @@ mod tests {
 
     #[test]
     fn spawn_positions_are_centered_on_z() {
-        // With 4 characters and 3.0 spacing: -4.5, -1.5, +1.5, +4.5
+        // With 4 soldiers and 3.0 spacing: -4.5, -1.5, +1.5, +4.5
         let positions = FORMATION.spawn_positions(Team::Red);
         let z_values: Vec<f32> = positions.iter().map(|p| p.z).collect();
         assert_eq!(z_values, vec![-4.5, -1.5, 1.5, 4.5]);

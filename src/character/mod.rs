@@ -7,7 +7,7 @@ use rand::seq::IndexedRandom;
 use crate::character::controller::controller_plugin;
 use crate::game::GameState;
 
-/// Registers character control and the health rules.
+/// Registers soldier control and the health rules.
 pub fn character_plugin(app: &mut App) {
     app.add_plugins(controller_plugin)
         .add_observer(despawn_sensors_with_soldier)

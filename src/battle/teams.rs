@@ -46,7 +46,7 @@ impl Team {
 pub struct TeamConfig {
     pub team: Team,
     pub positions: Vec<Vec3>,
-    /// When true, this team's characters receive the keyboard-driven
+    /// When true, this team's soldiers receive the keyboard-driven
     /// [`PlayerControlled`] marker.
     pub player_controlled: bool,
 }
@@ -56,9 +56,9 @@ pub struct SpawnConfig {
     pub teams: Vec<TeamConfig>,
 }
 
-/// Spawns every team's characters from the map's [`SpawnConfig`].
+/// Spawns every team's soldiers from the map's [`SpawnConfig`].
 ///
-/// All characters share one body mesh and one Tnua control-scheme config asset,
+/// All soldiers share one body mesh and one Tnua control-scheme config asset,
 /// and each team shares a single material. The team flagged
 /// [`TeamConfig::player_controlled`] also gets the [`PlayerControlled`] marker
 /// so keyboard input drives it.
@@ -73,7 +73,7 @@ pub fn spawn_teams<M: Map>(
     // Cylinder body shared by every soldier.
     let body_mesh = meshes.add(Cylinder { radius: BODY_RADIUS, half_height: BODY_HALF_HEIGHT });
 
-    // One control-scheme config asset tunes the basis and jump for all characters.
+    // One control-scheme config asset tunes the basis and jump for all soldiers.
     let scheme_config = scheme_configs.add(ControlSchemeConfig {
         basis: TnuaBuiltinWalkConfig { float_height: FLOAT_HEIGHT, ..default() },
         jump: TnuaBuiltinJumpConfig { height: JUMP_HEIGHT, ..default() },
